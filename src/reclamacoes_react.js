@@ -13,7 +13,6 @@ export default function ReclamacaoForm() {
     linha: "",
     numero_veiculo: "",
     local_ocorrencia: "",
-    tipo_onibus: "",
     descricao: "",
     nome_completo: "",
     email: "",
@@ -22,7 +21,7 @@ export default function ReclamacaoForm() {
     quer_retorno: false,
   });
 
-  const [errors, setErrors] = useState({});
+  const [errors] = useState({});
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");

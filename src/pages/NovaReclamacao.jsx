@@ -39,10 +39,6 @@ export default function NovaReclamacao() {
     []
   );
 
-  const SENTIDOS = ["IDA", "VOLTA"];
-  const TIPOS_ONIBUS = ["Convencional", "MOVE", "Suplementar"];
-  const TIPOS_SERVICO = ["Troncal", "Alimentador", "Circular", "Seletivo"];
-
   // Estado
   const [step, setStep] = useState(1);
   const [sending, setSending] = useState(false);
@@ -55,8 +51,6 @@ export default function NovaReclamacao() {
     numero_veiculo: "",
     local_ocorrencia: "",
     
-    tipo_onibus: "",
-    tipo_servico: "",
     descricao: "",
     anexos: [],
     quer_retorno: false,
@@ -68,6 +62,7 @@ export default function NovaReclamacao() {
     prazo_sla: "",
   });
   const [errors, setErrors] = useState({});
+  const [lastProtocolo, setLastProtocolo] = useState(form.protocolo);
 
   function makeProtocolo() {
     return `TOP-${Date.now()}`; // idêntico ao modelo em formato
@@ -99,8 +94,6 @@ export default function NovaReclamacao() {
       if (!form.local_ocorrencia) e.local_ocorrencia = "Informe o local.";
     }
     if (s === 2) {
-      if (!form.tipo_onibus) e.tipo_onibus = "Selecione o tipo de ônibus.";
-      if (!form.tipo_servico) e.tipo_servico = "Selecione o tipo de serviço.";
       if (!form.descricao || form.descricao.trim().length < 20)
         e.descricao = "Mínimo de 20 caracteres.";
     }
@@ -140,15 +133,32 @@ export default function NovaReclamacao() {
     setResultMsg("");
 
     try {
+      const currentProtocolo = form.protocolo;
       const payload = { ...form, prazo_sla: prazo.toISOString() };
 
       // Apps Script (sem headers p/ evitar preflight CORS)
-      await fetch(import.meta.env.VITE_APPSCRIPT_URL, {
+      const res = await fetch(import.meta.env.VITE_APPSCRIPT_URL, {
         method: "POST",
         body: JSON.stringify(payload),
       });
 
-      setResultMsg(" Reclamação registrada com sucesso!");
+      if (!res.ok) {
+        throw new Error("Resposta inválida");
+      }
+
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
+
+      const protocoloOficial =
+        data?.protocolo ?? data?.Protocolo ?? data?.result?.protocolo ?? null;
+
+      setLastProtocolo(protocoloOficial || currentProtocolo);
+      setResultMsg("Reclamação registrada com sucesso!");
+
       const nextProtocolo = makeProtocolo();
       setForm({
         protocolo: nextProtocolo,
@@ -157,9 +167,7 @@ export default function NovaReclamacao() {
         linha: "",
         numero_veiculo: "",
         local_ocorrencia: "",
-        
-        tipo_onibus: "",
-        tipo_servico: "",
+
         descricao: "",
         anexos: [],
         quer_retorno: false,
@@ -171,8 +179,8 @@ export default function NovaReclamacao() {
         prazo_sla: "",
       });
       setStep(4);
-    } catch (err) {
-      setResultMsg(" Erro ao enviar. Tente novamente.");
+    } catch {
+      setResultMsg("Erro ao enviar. Tente novamente.");
     } finally {
       setSending(false);
     }
@@ -209,10 +217,25 @@ export default function NovaReclamacao() {
 
           {/* Form content */}
           <form onSubmit={handleSubmit} className="p-6 space-y-8">
-            {step === 1 && <StepDados form={form} update={update} errors={errors} ASSUNTOS={ASSUNTOS} LINHAS={LINHAS} SENTIDOS={SENTIDOS} />}
-            {step === 2 && <StepDescricao form={form} update={update} errors={errors} TIPOS_ONIBUS={TIPOS_ONIBUS} TIPOS_SERVICO={TIPOS_SERVICO} addAnexo={addAnexo} removeAnexo={removeAnexo} />}
+            {step === 1 && <StepDados form={form} update={update} errors={errors} ASSUNTOS={ASSUNTOS} LINHAS={LINHAS} />}
+            {step === 2 && <StepDescricao form={form} update={update} errors={errors} addAnexo={addAnexo} removeAnexo={removeAnexo} />}
             {step === 3 && <StepContato form={form} update={update} errors={errors} />}
-            {step === 4 && <Success protocolo={form.protocolo} resultMsg={resultMsg} onNew={() => { setStep(1); setResultMsg(""); }} />}
+            {step === 4 && (
+              <Success
+                protocolo={lastProtocolo}
+                resultMsg={resultMsg}
+                onNew={() => {
+                  setStep(1);
+                  setResultMsg("");
+                }}
+              />
+            )}
+
+            {step < 4 && resultMsg && (
+              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                {resultMsg}
+              </div>
+            )}
 
             {step < 4 && (
               <div className="flex items-center justify-between pt-6 border-t">
@@ -279,7 +302,7 @@ function Field({ label, hint, error, children }) {
   );
 }
 
-function StepDados({ form, update, errors, ASSUNTOS, LINHAS, SENTIDOS }) {
+function StepDados({ form, update, errors, ASSUNTOS, LINHAS }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
       <Field label="Protocolo">
@@ -353,57 +376,13 @@ function StepDados({ form, update, errors, ASSUNTOS, LINHAS, SENTIDOS }) {
         </div>
       </Field>
 
-      <Field label="Sentido da viagem" error={errors.sentido_viagem}>
-        <select
-          value={form.sentido_viagem}
-          onChange={(e) => update("sentido_viagem", e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-        >
-          <option value="">Selecione...</option>
-          {SENTIDOS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </Field>
     </section>
   );
 }
 
-function StepDescricao({ form, update, errors, TIPOS_ONIBUS, TIPOS_SERVICO, addAnexo, removeAnexo }) {
+function StepDescricao({ form, update, errors, addAnexo, removeAnexo }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <Field label="Tipo de ônibus" error={errors.tipo_onibus}>
-        <select
-          value={form.tipo_onibus}
-          onChange={(e) => update("tipo_onibus", e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-        >
-          <option value="">Selecione...</option>
-          {TIPOS_ONIBUS.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </Field>
-
-      <Field label="Tipo de serviço" error={errors.tipo_servico}>
-        <select
-          value={form.tipo_servico}
-          onChange={(e) => update("tipo_servico", e.target.value)}
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-        >
-          <option value="">Selecione...</option>
-          {TIPOS_SERVICO.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </Field>
-
       <div className="md:col-span-2">
         <Field label="Descrição detalhada" error={errors.descricao} hint="Mínimo 20 caracteres. Evite dados pessoais.">
           <textarea
@@ -430,6 +409,14 @@ function StepDescricao({ form, update, errors, TIPOS_ONIBUS, TIPOS_SERVICO, addA
 function StepContato({ form, update, errors }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="md:col-span-2">
+        <p className="text-sm font-semibold text-gray-800">
+          Deseja receber um retorno sobre o status da reclamação?
+          <span className="ml-2 text-xs font-semibold uppercase text-gray-500">Opcional</span>
+        </p>
+        {errors.contato && <p className="mt-1 text-xs text-red-600">{errors.contato}</p>}
+      </div>
+
       <Field label="Nome completo" error={errors.nome_completo}>
         <input
           value={form.nome_completo}
@@ -452,7 +439,7 @@ function StepContato({ form, update, errors }) {
         </div>
       </Field>
 
-      <Field label="Telefone">
+      <Field label="Telefone" error={!errors.email && errors.contato}>
         <div className="relative">
           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input

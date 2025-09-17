@@ -100,26 +100,6 @@ export default function DadosComplementares({ formData, setFormData, errors }) {
           )}
         </div>
 
-        {/* Tipo de ônibus */}
-        <div className="space-y-2">
-          <Label htmlFor="tipo_onibus" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-            Tipo de ônibus
-            <span className="text-red-500">*</span>
-          </Label>
-          <Input
-            type="text"
-            id="tipo_onibus"
-            value={formData.tipo_onibus}
-            onChange={(e) => setFormData(prev => ({ ...prev, tipo_onibus: e.target.value }))}
-            className={`${errors.tipo_onibus ? "border-red-400" : "border-slate-200"}`}
-          />
-          {errors.tipo_onibus && (
-            <div className="flex items-center gap-2 text-red-600 text-sm">
-              <AlertCircle className="w-4 h-4" />
-              <span>Este campo é obrigatório</span>
-            </div>
-          )}
-        </div>
       </CardContent>
     </Card>
   );

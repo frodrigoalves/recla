@@ -9,13 +9,7 @@
 }
 /* ===== Hotfix UX  11/09/2025 ===== */
 
-/* 1) Esconder 'Sentido da viagem' (label + select) */
-[name="sentido_viagem"],
-label:has(+ [name="sentido_viagem"]) {
-  display: none !important;
-}
-
-/* 2) Forçar rolagem na lista de Linhas (cobre vários padrões) */
+/* Forçar rolagem na lista de Linhas (cobre vários padrões) */
 [role="listbox"],
 .select-options,
 .options,
