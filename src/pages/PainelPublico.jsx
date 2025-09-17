@@ -1,4 +1,4 @@
-ï»¿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
 
 export default function PainelPublico() {
@@ -19,25 +19,25 @@ export default function PainelPublico() {
 
   const total = rows.length;
   const pendentes = rows.filter(r => !r[11] || r[11] === "Pendente").length;
-  const analise = rows.filter(r => r[11] === "Em AnÃ¡lise").length;
+  const analise = rows.filter(r => r[11] === "Em Análise").length;
   const resolvidas = rows.filter(r => r[11] === "Resolvido").length;
 
   const renderStatus = (status) => {
     if (status === "Resolvido") {
       return <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">Resolvido</span>;
     }
-    if (status === "Em AnÃ¡lise") {
-      return <span className="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">Em AnÃ¡lise</span>;
+    if (status === "Em Análise") {
+      return <span className="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">Em Análise</span>;
     }
     return <span className="px-3 py-1 rounded-full text-xs bg-red-100 text-red-700">Pendente</span>;
   };
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-10">
-      {/* CabeÃ§alho */}
+      {/* Cabeçalho */}
       <header className="text-center space-y-2">
-        <h1 className="text-4xl font-bold text-gray-800"> ReclamaÃ§Ãµes PÃºblicas</h1>
-        <p className="text-gray-500">Acompanhe as ocorrÃªncias registradas em tempo real</p>
+        <h1 className="text-4xl font-bold text-gray-800"> Reclamações Públicas</h1>
+        <p className="text-gray-500">Acompanhe as ocorrências registradas em tempo real</p>
       </header>
 
       {/* Cards de Resumo */}
@@ -59,7 +59,7 @@ export default function PainelPublico() {
         <div className="p-5 bg-white shadow rounded-xl flex items-center gap-4 hover:shadow-lg transition">
           <Clock className="text-yellow-500 w-8 h-8" />
           <div>
-            <p className="text-sm text-gray-500">Em AnÃ¡lise</p>
+            <p className="text-sm text-gray-500">Em Análise</p>
             <p className="text-2xl font-bold text-yellow-600">{analise}</p>
           </div>
         </div>
@@ -85,9 +85,9 @@ export default function PainelPublico() {
                 <th className="px-6 py-3">Protocolo</th>
                 <th className="px-6 py-3">Assunto</th>
                 <th className="px-6 py-3">Linha</th>
-                <th className="px-6 py-3">VeÃ­culo</th>
+                <th className="px-6 py-3">Veículo</th>`n                <th className="px-6 py-3">Local</th>`n                <th className="px-6 py-3">Local</th>
                 <th className="px-6 py-3">Data/Hora</th>
-                <th className="px-6 py-3">DescriÃ§Ã£o</th>
+                <th className="px-6 py-3">Descrição</th>
                 <th className="px-6 py-3">Status</th>
               </tr>
             </thead>

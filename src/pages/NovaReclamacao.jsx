@@ -1,21 +1,21 @@
-ï»¿import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ClipboardList, FileText, ShieldCheck, ArrowLeft, ArrowRight, Upload, MapPin, Bus, Mail, Phone, CheckCircle2, AlertCircle } from "lucide-react";
 
-// PÃ¡gina pÃºblica de reclamaÃ§Ãµes  layout e UX equivalentes ao modelo fornecido
+// Página pública de reclamações  layout e UX equivalentes ao modelo fornecido
 export default function NovaReclamacao() {
-  // OpÃ§Ãµes (podem ser expandidas depois)
+  // Opções (podem ser expandidas depois)
   const ASSUNTOS = useMemo(
     () => [
       "ACESSIBILIDADE",
-      "AUSÃŠNCIA DE AGENTE DE BORDO",
+      "AUSÊNCIA DE AGENTE DE BORDO",
       "COMPORTAMENTO INADEQUADO DO MOTORISTA",
-      "CONDIÃ‡Ã•ES DO VEÃCULO",
+      "CONDIÇÕES DO VEÍCULO",
       "EXCESSO DE PASSAGEIROS",
-      "FALTA DE Ã”NIBUS",
+      "FALTA DE ÔNIBUS",
       "FALTA DE PARADA",
-      "HORÃRIOS / ATRASOS",
-      "ITINERÃRIO / ROTA",
-      "LIMPEZA DO VEÃCULO",
+      "HORÁRIOS / ATRASOS",
+      "ITINERÁRIO / ROTA",
+      "LIMPEZA DO VEÍCULO",
       "OUTROS",
     ],
     []
@@ -24,13 +24,13 @@ export default function NovaReclamacao() {
   const LINHAS = useMemo(
     () => [
       "85 - EST.S.GABRIEL/CENTRO - VIA FLORESTA",
-      "812 - ESTAÃ‡ÃƒO SÃƒO GABRIEL",
-      "815 - ESTAÃ‡ÃƒO SÃƒO GABRIEL/CONJ. PAULO VI",
-      "822 - ESTAÃ‡ÃƒO JOSÃ‰ CÃ‚NDIDO / VILA MARIA",
+      "812 - ESTAÇÃO SÃO GABRIEL",
+      "815 - ESTAÇÃO SÃO GABRIEL/CONJ. PAULO VI",
+      "822 - ESTAÇÃO JOSÉ CÂNDIDO / VILA MARIA",
       "5201 - DONA CLARA/BURITIS",
-      "5401 - SÃƒO LUIZ/DOM CABRAL",
+      "5401 - SÃO LUIZ/DOM CABRAL",
       "9105 - NOVA VISTA/SION",
-      "9204 - SANTA EFIGÃŠNIA/ESTORIL",
+      "9204 - SANTA EFIGÊNIA/ESTORIL",
       "9208 - TAQUARIL/CONJ. SANTA MARIA",
       "9211 - CAETANO FURQUIM/HAVAI",
       "9214 - CAETANO FURQUIM/HAVAI - VIA ALTO HAVAI",
@@ -54,7 +54,7 @@ export default function NovaReclamacao() {
     linha: "",
     numero_veiculo: "",
     local_ocorrencia: "",
-    sentido_viagem: "",
+    
     tipo_onibus: "",
     tipo_servico: "",
     descricao: "",
@@ -70,7 +70,7 @@ export default function NovaReclamacao() {
   const [errors, setErrors] = useState({});
 
   function makeProtocolo() {
-    return `TOP-${Date.now()}`; // idÃªntico ao modelo em formato
+    return `TOP-${Date.now()}`; // idêntico ao modelo em formato
   }
 
   function update(field, value) {
@@ -88,21 +88,21 @@ export default function NovaReclamacao() {
     update("anexos", copy);
   }
 
-  // ValidaÃ§Ã£o por etapa (espelha as regras do modelo)
+  // Validação por etapa (espelha as regras do modelo)
   function validateStep(s) {
     const e = {};
     if (s === 1) {
       if (!form.assunto) e.assunto = "Selecione um assunto.";
       if (!form.data_hora_ocorrencia) e.data_hora_ocorrencia = "Informe data e hora.";
       if (!form.linha) e.linha = "Selecione a linha.";
-      if (!form.sentido_viagem) e.sentido_viagem = "Selecione o sentido.";
+      
       if (!form.local_ocorrencia) e.local_ocorrencia = "Informe o local.";
     }
     if (s === 2) {
-      if (!form.tipo_onibus) e.tipo_onibus = "Selecione o tipo de Ã´nibus.";
-      if (!form.tipo_servico) e.tipo_servico = "Selecione o tipo de serviÃ§o.";
+      if (!form.tipo_onibus) e.tipo_onibus = "Selecione o tipo de ônibus.";
+      if (!form.tipo_servico) e.tipo_servico = "Selecione o tipo de serviço.";
       if (!form.descricao || form.descricao.trim().length < 20)
-        e.descricao = "MÃ­nimo de 20 caracteres.";
+        e.descricao = "Mínimo de 20 caracteres.";
     }
     if (s === 3) {
       if (form.quer_retorno) {
@@ -110,7 +110,7 @@ export default function NovaReclamacao() {
         if (!form.email && !form.telefone)
           e.contato = "Informe e-mail ou telefone.";
       }
-      if (!form.lgpd_aceite) e.lgpd_aceite = "Ã‰ necessÃ¡rio aceitar a LGPD.";
+      if (!form.lgpd_aceite) e.lgpd_aceite = "É necessário aceitar a LGPD.";
     }
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -148,7 +148,7 @@ export default function NovaReclamacao() {
         body: JSON.stringify(payload),
       });
 
-      setResultMsg(" ReclamaÃ§Ã£o registrada com sucesso!");
+      setResultMsg(" Reclamação registrada com sucesso!");
       const nextProtocolo = makeProtocolo();
       setForm({
         protocolo: nextProtocolo,
@@ -157,7 +157,7 @@ export default function NovaReclamacao() {
         linha: "",
         numero_veiculo: "",
         local_ocorrencia: "",
-        sentido_viagem: "",
+        
         tipo_onibus: "",
         tipo_servico: "",
         descricao: "",
@@ -181,25 +181,25 @@ export default function NovaReclamacao() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 p-3 md:p-4">
       <div className="max-w-2xl mx-auto py-4 md:py-8">
-        {/* CabeÃ§alho idÃªntico em tipografia e espaÃ§amento */}
+        {/* Cabeçalho idêntico em tipografia e espaçamento */}
         <div className="text-center mb-6 md:mb-8 space-y-3 md:space-y-4">
           <h1 className="text-lg md:text-2xl font-bold text-slate-800 px-2">
-            FormulÃ¡rio de ReclamaÃ§Ã£o
+            Formulário de Reclamação
           </h1>
           <p className="text-sm md:text-base text-slate-600 px-3">
-            Registre sua reclamaÃ§Ã£o sobre o transporte coletivo. Sua opiniÃ£o Ã© importante para melhorarmos nossos serviÃ§os.
+            Registre sua reclamação sobre o transporte coletivo. Sua opinião é importante para melhorarmos nossos serviços.
           </p>
           <div className="bg-green-50 border border-green-200 rounded-lg p-3 mx-2 md:mx-0">
             <p className="text-green-700 text-xs md:text-sm">Preencha todas as etapas e guarde seu protocolo.</p>
           </div>
         </div>
 
-        {/* Stepper + barra de progresso (visual compatÃ­vel) */}
+        {/* Stepper + barra de progresso (visual compatível) */}
         <div className="bg-white rounded-xl shadow mb-6">
           <div className="px-6 pt-6">
             <div className="grid grid-cols-3 gap-4 text-sm">
               <StepChip active={step >= 1} icon={<ClipboardList className="w-4 h-4" />} label="Dados" />
-              <StepChip active={step >= 2} icon={<FileText className="w-4 h-4" />} label="DescriÃ§Ã£o" />
+              <StepChip active={step >= 2} icon={<FileText className="w-4 h-4" />} label="Descrição" />
               <StepChip active={step >= 3} icon={<ShieldCheck className="w-4 h-4" />} label="Contato & LGPD" />
             </div>
             <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
@@ -232,7 +232,7 @@ export default function NovaReclamacao() {
                     disabled={sending}
                     className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
                   >
-                    AvanÃ§ar <ArrowRight className="w-4 h-4" />
+                    Avançar <ArrowRight className="w-4 h-4" />
                   </button>
                 ) : (
                   <button
@@ -240,7 +240,7 @@ export default function NovaReclamacao() {
                     disabled={sending}
                     className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
                   >
-                    {sending ? "Enviando..." : "Enviar reclamaÃ§Ã£o"} <Upload className="w-4 h-4" />
+                    {sending ? "Enviando..." : "Enviar reclamação"} <Upload className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -251,7 +251,7 @@ export default function NovaReclamacao() {
         {/* Aviso LGPD/Privacidade */}
         <p className="text-xs text-gray-500 mt-2 flex items-start gap-2">
           <AlertCircle className="w-4 h-4 mt-[1px]" />
-          Ao enviar, vocÃª concorda com o tratamento dos dados para fins de atendimento e melhoria do serviÃ§o.
+          Ao enviar, você concorda com o tratamento dos dados para fins de atendimento e melhoria do serviço.
         </p>
       </div>
     </div>
@@ -305,7 +305,7 @@ function StepDados({ form, update, errors, ASSUNTOS, LINHAS, SENTIDOS }) {
         </select>
       </Field>
 
-      <Field label="Data e hora da ocorrÃªncia" error={errors.data_hora_ocorrencia}>
+      <Field label="Data e hora da ocorrência" error={errors.data_hora_ocorrencia}>
         <input
           type="datetime-local"
           value={form.data_hora_ocorrencia}
@@ -329,7 +329,7 @@ function StepDados({ form, update, errors, ASSUNTOS, LINHAS, SENTIDOS }) {
         </select>
       </Field>
 
-      <Field label="NÃºmero do veÃ­culo">
+      <Field label="Número do veículo">
         <div className="relative">
           <Bus className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
@@ -341,11 +341,11 @@ function StepDados({ form, update, errors, ASSUNTOS, LINHAS, SENTIDOS }) {
         </div>
       </Field>
 
-      <Field label="Local da ocorrÃªncia" error={errors.local_ocorrencia}>
+      <Field label="Local da ocorrência" error={errors.local_ocorrencia}>
         <div className="relative">
           <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
-            placeholder="Rua/EstaÃ§Ã£o/Ponto"
+            placeholder="Rua/Estação/Ponto"
             value={form.local_ocorrencia}
             onChange={(e) => update("local_ocorrencia", e.target.value)}
             className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -374,7 +374,7 @@ function StepDados({ form, update, errors, ASSUNTOS, LINHAS, SENTIDOS }) {
 function StepDescricao({ form, update, errors, TIPOS_ONIBUS, TIPOS_SERVICO, addAnexo, removeAnexo }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <Field label="Tipo de Ã´nibus" error={errors.tipo_onibus}>
+      <Field label="Tipo de ônibus" error={errors.tipo_onibus}>
         <select
           value={form.tipo_onibus}
           onChange={(e) => update("tipo_onibus", e.target.value)}
@@ -389,7 +389,7 @@ function StepDescricao({ form, update, errors, TIPOS_ONIBUS, TIPOS_SERVICO, addA
         </select>
       </Field>
 
-      <Field label="Tipo de serviÃ§o" error={errors.tipo_servico}>
+      <Field label="Tipo de serviço" error={errors.tipo_servico}>
         <select
           value={form.tipo_servico}
           onChange={(e) => update("tipo_servico", e.target.value)}
@@ -405,7 +405,7 @@ function StepDescricao({ form, update, errors, TIPOS_ONIBUS, TIPOS_SERVICO, addA
       </Field>
 
       <div className="md:col-span-2">
-        <Field label="DescriÃ§Ã£o detalhada" error={errors.descricao} hint="MÃ­nimo 20 caracteres. Evite dados pessoais.">
+        <Field label="Descrição detalhada" error={errors.descricao} hint="Mínimo 20 caracteres. Evite dados pessoais.">
           <textarea
             value={form.descricao}
             onChange={(e) => update("descricao", e.target.value.slice(0, 1000))}
@@ -418,9 +418,9 @@ function StepDescricao({ form, update, errors, TIPOS_ONIBUS, TIPOS_SERVICO, addA
       </div>
 
       <div className="md:col-span-2">
-        <Field label="Anexos (URLs pÃºblicas de imagens/vÃ­deos/documentos)">
+        <Field label="Anexos (URLs públicas de imagens/vídeos/documentos)">
           <Anexos anexos={form.anexos} onAdd={addAnexo} onRemove={removeAnexo} />
-          <p className="text-xs text-gray-500 mt-1">Dica: suba no Google Drive/Imgur e cole o link compartilhÃ¡vel.</p>
+          <p className="text-xs text-gray-500 mt-1">Dica: suba no Google Drive/Imgur e cole o link compartilhável.</p>
         </Field>
       </div>
     </section>
@@ -472,7 +472,7 @@ function StepContato({ form, update, errors }) {
             onChange={(e) => update("quer_retorno", e.target.checked)}
             className="mt-1"
           />
-          <span className="text-sm text-gray-700">Desejo ser contatado(a) sobre esta reclamaÃ§Ã£o.</span>
+          <span className="text-sm text-gray-700">Desejo ser contatado(a) sobre esta reclamação.</span>
         </label>
       </div>
 
@@ -485,7 +485,7 @@ function StepContato({ form, update, errors }) {
             className="mt-1"
           />
           <span className="text-sm text-gray-700">
-            Li e concordo com o tratamento dos meus dados pessoais nos termos da LGPD para fins de registro e resposta desta reclamaÃ§Ã£o.
+            Li e concordo com o tratamento dos meus dados pessoais nos termos da LGPD para fins de registro e resposta desta reclamação.
           </span>
         </label>
         {errors.lgpd_aceite && <p className="mt-1 text-xs text-red-600">{errors.lgpd_aceite}</p>}
@@ -498,7 +498,7 @@ function Success({ protocolo, resultMsg, onNew }) {
   return (
     <section className="flex flex-col items-center text-center py-10">
       <CheckCircle2 className="w-14 h-14 text-green-600" />
-      <h2 className="text-2xl font-bold mt-4">ReclamaÃ§Ã£o enviada!</h2>
+      <h2 className="text-2xl font-bold mt-4">Reclamação enviada!</h2>
       <p className="text-gray-600 mt-2">Guarde seu protocolo para acompanhamento:</p>
       <div className="mt-3 px-4 py-2 bg-green-50 text-green-700 rounded font-mono">{protocolo}</div>
       {resultMsg && <p className="mt-4 text-gray-700">{resultMsg}</p>}
@@ -506,7 +506,7 @@ function Success({ protocolo, resultMsg, onNew }) {
         onClick={onNew}
         className="mt-6 inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700"
       >
-        Registrar nova reclamaÃ§Ã£o
+        Registrar nova reclamação
       </button>
     </section>
   );
@@ -520,7 +520,7 @@ function Anexos({ anexos, onAdd, onRemove }) {
         <input
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="Cole a URL pÃºblica do anexo"
+          placeholder="Cole a URL pública do anexo"
           className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
         />
         <button

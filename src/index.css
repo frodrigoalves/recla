@@ -7,3 +7,30 @@
   html, body, #root { height: 100%; }
   body { @apply bg-gray-50 text-slate-900 font-sans antialiased; }
 }
+/* ===== Hotfix UX  11/09/2025 ===== */
+
+/* 1) Esconder 'Sentido da viagem' (label + select) */
+[name="sentido_viagem"],
+label:has(+ [name="sentido_viagem"]) {
+  display: none !important;
+}
+
+/* 2) Forçar rolagem na lista de Linhas (cobre vários padrões) */
+[role="listbox"],
+.select-options,
+.options,
+.lista-linhas,
+.dropdown-menu,
+ul[role="listbox"],
+div[role="listbox"] {
+  max-height: 16rem;        /* ~256px */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+}
+
+/* Se o dropdown for absolutamente posicionado, ajuda na visualização */
+[role="listbox"],
+.dropdown-menu { 
+  z-index: 50;
+}
