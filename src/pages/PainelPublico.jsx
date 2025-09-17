@@ -10,7 +10,7 @@ export default function PainelPublico() {
       .then((res) => res.text())
       .then((t) => {
         const json = JSON.parse(t.substring(47, t.length - 2));
-        const R = json.table.rows.map(r => r.c.map(c => (c ? c.v : "")));
+        const R = json.table.rows.map((r) => r.c.map((c) => (c ? c.v : "")));
         setRows(R);
       })
       .catch(() => setRows([]))
@@ -18,9 +18,9 @@ export default function PainelPublico() {
   }, []);
 
   const total = rows.length;
-  const pendentes = rows.filter(r => !r[11] || r[11] === "Pendente").length;
-  const analise = rows.filter(r => r[11] === "Em Análise").length;
-  const resolvidas = rows.filter(r => r[11] === "Resolvido").length;
+  const pendentes = rows.filter((r) => !r[11] || r[11] === "Pendente").length;
+  const analise = rows.filter((r) => r[11] === "Em Análise").length;
+  const resolvidas = rows.filter((r) => r[11] === "Resolvido").length;
 
   const renderStatus = (status) => {
     if (status === "Resolvido") {
@@ -84,9 +84,10 @@ export default function PainelPublico() {
               <tr>
                 <th className="px-6 py-3">Protocolo</th>
                 <th className="px-6 py-3">Assunto</th>
-                <th className="px-6 py-3">Linha</th>
-                <th className="px-6 py-3">Veículo</th>`n                <th className="px-6 py-3">Local</th>`n                <th className="px-6 py-3">Local</th>
                 <th className="px-6 py-3">Data/Hora</th>
+                <th className="px-6 py-3">Linha</th>
+                <th className="px-6 py-3">Veículo</th>
+                <th className="px-6 py-3">Local</th>
                 <th className="px-6 py-3">Descrição</th>
                 <th className="px-6 py-3">Status</th>
               </tr>
@@ -96,9 +97,10 @@ export default function PainelPublico() {
                 <tr key={i} className={`${i % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition`}>
                   <td className="px-6 py-4 font-medium text-gray-800">{r[0]}</td>
                   <td className="px-6 py-4 text-gray-700">{r[1]}</td>
-                  <td className="px-6 py-4 text-gray-700">{r[4]}</td>
-                  <td className="px-6 py-4 text-gray-700">{r[5]}</td>
                   <td className="px-6 py-4 text-gray-600">{r[2]}</td>
+                  <td className="px-6 py-4 text-gray-700">{r[3]}</td>
+                  <td className="px-6 py-4 text-gray-700">{r[4]}</td>
+                  <td className="px-6 py-4 text-gray-600">{r[5]}</td>
                   <td className="px-6 py-4 max-w-xs truncate text-gray-600" title={r[9]}>{r[9]}</td>
                   <td className="px-6 py-4">{renderStatus(r[11])}</td>
                 </tr>

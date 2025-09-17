@@ -9,13 +9,10 @@ const LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/pub
 export default function Layout({ children }) {
   const location = useLocation();
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (location.pathname !== createPageUrl("NovaReclamacao").replace(window.location.origin, "")) {
       checkAuth();
-    } else {
-      setLoading(false);
     }
   }, [location.pathname]);
 
@@ -23,10 +20,8 @@ export default function Layout({ children }) {
     try {
       const currentUser = await User.me();
       setUser(currentUser);
-    } catch (error) {
+    } catch {
       setUser(null);
-    } finally {
-      setLoading(false);
     }
   };
 

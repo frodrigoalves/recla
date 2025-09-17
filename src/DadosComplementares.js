@@ -2,7 +2,6 @@ import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertCircle, Bus, MapPin, Clock } from "lucide-react";
 
 const LINHAS_SUGERIDAS = [
@@ -94,25 +93,6 @@ export default function DadosComplementares({ formData, setFormData, errors }) {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="tipo_onibus" className="text-sm font-semibold text-slate-700">
-            Tipo de Ônibus
-            <span className="text-red-500">*</span>
-          </Label>
-          <Select
-            value={formData.tipo_onibus}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, tipo_onibus: value }))}
-          >
-            <SelectTrigger className={`h-11 border-slate-200 focus:border-blue-500 ${errors.tipo_onibus ? 'border-red-400' : ''}`}>
-              <SelectValue placeholder="Selecione o tipo..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Convencional">Convencional</SelectItem>
-              <SelectItem value="Articulado">Articulado</SelectItem>
-              <SelectItem value="Executivo">Executivo</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </CardContent>
     </Card>
   );
