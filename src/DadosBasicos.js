@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,12 +8,14 @@ const ASSUNTOS = [
   "ACESSIBILIDADE",
   "AUSÊNCIA DE AGENTE DE BORDO",
   "CARTÃO BHBUS / RECARGA À BORDO",
-  "COMPORTAMENTO INADEQUADO DO MOTORISTA/AGENTE DE BORDO X IDOSO",
+  "COMPORTAMENTO INADEQUADO DO MOTORISTA/AGENTE DE BORDO",
   "DESCUMPRIMENTO DE ITINERARIO",
   "ESTADO DE CONSERVAÇÃO DO VEÍCULO",
+  "FUNCIONAMENTO DO AR CONDICIONADO",
+  "FUNCIONAMENTO DO ELEVADOR",
   "SUPERLOTAÇÃO",
-  "TEMPO DE ESPERA",
-  "TARIFA"
+  "TARIFA",
+  "TEMPO DE ESPERA"
 ];
 
 export default function DadosBasicos({ formData, setFormData, errors }) {
@@ -35,20 +37,23 @@ export default function DadosBasicos({ formData, setFormData, errors }) {
           </Label>
           <Select
             value={formData.assunto}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, assunto: value }))}>
+            onValueChange={(value) => setFormData(prev => ({ ...prev, assunto: value }))}
+          >
             <SelectTrigger className={`h-12 border-slate-200 focus:border-blue-500 ${errors.assunto ? 'border-red-400' : ''}`}>
-              <SelectValue placeholder="Escolha o assunto da sua reclamação..." />
+              <SelectValue placeholder="Escolha o assunto da reclamação..." />
             </SelectTrigger>
             <SelectContent className="max-h-60">
               {ASSUNTOS.map((assunto) => (
-                <SelectItem key={assunto} value={assunto}>{assunto}</SelectItem>
+                <SelectItem key={assunto} value={assunto} className="text-sm py-3">
+                  {assunto}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
           {errors.assunto && (
             <div className="flex items-center gap-2 text-red-600 text-sm">
               <AlertCircle className="w-4 h-4" />
-              <span>Este campo é obrigatório</span>
+              <span>Campo obrigatório</span>
             </div>
           )}
         </div>

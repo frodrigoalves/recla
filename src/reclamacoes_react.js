@@ -1,6 +1,28 @@
 ﻿import React, { useState } from "react";
+import DadosBasicos from "./DadosBasicos";
+import DadosComplementares from "./DadosComplementares";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function ReclamacaoForm() {
+  const [formData, setFormData] = useState({
+    assunto: "",
+    data_hora_ocorrencia: "",
+    linha: "",
+    numero_veiculo: "",
+    local_ocorrencia: "",
+    tipo_onibus: "",
+    descricao: "",
+    nome_completo: "",
+    email: "",
+    telefone: "",
+    lgpd_aceite: false,
+    quer_retorno: false,
+  });
+
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -11,112 +33,107 @@ export default function ReclamacaoForm() {
     setSuccessMsg("");
     setErrorMsg("");
 
-    const form = e.target;
-    const data = {
-      assunto: form.assunto.value,
-      data_hora_ocorrencia: form.data_hora_ocorrencia.value,
-      linha: form.linha.value,
-      numero_veiculo: form.numero_veiculo.value,
-      local_ocorrencia: form.local_ocorrencia.value,
-      tipo_onibus: form.tipo_onibus.value,
-      tipo_servico: form.tipo_servico.value,
-      descricao: form.descricao.value,
-      nome_completo: form.nome_completo.value,
-      email: form.email.value,
-      telefone: form.telefone.value,
-      lgpd_aceite: form.lgpd_aceite.checked,
-      quer_retorno: form.quer_retorno.checked,
-    };
-
     try {
       const res = await fetch(import.meta.env.VITE_APPSCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formData),
       });
 
       const json = await res.json();
       if (json.ok) {
-        setSuccessMsg(
-          ` Reclamação registrada com sucesso. Protocolo: ${json.protocolo}`
-        );
-        form.reset();
+        setSuccessMsg(`Reclamação registrada com sucesso. Protocolo: ${json.protocolo}`);
       } else {
-        setErrorMsg(" Erro ao registrar: " + json.erro);
+        setErrorMsg("Erro ao registrar: " + json.error);
       }
     } catch (err) {
-      setErrorMsg(" Falha de conexão: " + err.message);
+      setErrorMsg("Falha de conexão: " + err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 max-w-lg mx-auto">
-      <h2 className="text-xl font-bold mb-4">Registrar Reclamação</h2>
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl mx-auto p-4">
+      <DadosBasicos formData={formData} setFormData={setFormData} errors={errors} />
+      <DadosComplementares formData={formData} setFormData={setFormData} errors={errors} />
 
-      <label className="block mb-2">Assunto:</label>
-      <input type="text" name="assunto" required className="w-full p-2 border rounded mb-4" />
+      <Card className="shadow-lg border-0 bg-white/90 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-slate-800">
+            <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-xs">3</span>
+            </div>
+            Descrição e Contato
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Label className="text-sm font-semibold text-slate-700">Descrição <span className="text-red-500">*</span></Label>
+          <Textarea
+            value={formData.descricao}
+            onChange={(e) => setFormData(prev => ({ ...prev, descricao: e.target.value }))}
+            required
+            minLength={20}
+            className="border-slate-200 focus:border-blue-500"
+          />
 
-      <label className="block mb-2">Data e Hora da Ocorrência:</label>
-      <input type="datetime-local" name="data_hora_ocorrencia" required className="w-full p-2 border rounded mb-4" />
+          <p className="text-sm font-semibold">
+            Deseja receber um retorno sobre o status da reclamação? OPCIONAL
+          </p>
 
-      <label className="block mb-2">Linha:</label>
-      <select name="linha" required size={6} className="w-full p-2 border rounded mb-4 overflow-y-scroll max-h-40">
-        <option>85 - EST.S.GABRIEL/CENTRO</option>
-        <option>1502 - MOVE 51</option>
-        <option>9501 - MOVE 61</option>
-        <option>941 - SANTA AMÉLIA</option>
-        <option>9206 - SÃO GABRIEL</option>
-      </select>
+          <Label>Nome completo:</Label>
+          <Input
+            value={formData.nome_completo}
+            onChange={(e) => setFormData(prev => ({ ...prev, nome_completo: e.target.value }))}
+            className="border-slate-200 focus:border-blue-500"
+          />
 
-      <label className="block mb-2">Número do Veículo:</label>
-      <input type="text" name="numero_veiculo" className="w-full p-2 border rounded mb-4" />
+          <Label>E-mail:</Label>
+          <Input
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+            className="border-slate-200 focus:border-blue-500"
+          />
 
-      <label className="block mb-2">Local da Ocorrência:</label>
-      <input type="text" name="local_ocorrencia" className="w-full p-2 border rounded mb-4" />
+          <Label>Telefone:</Label>
+          <Input
+            type="tel"
+            value={formData.telefone}
+            onChange={(e) => setFormData(prev => ({ ...prev, telefone: e.target.value }))}
+            className="border-slate-200 focus:border-blue-500"
+          />
 
-      <label className="block mb-2">Tipo de Ônibus:</label>
-      <select name="tipo_onibus" required className="w-full p-2 border rounded mb-4">
-        <option>Convencional</option>
-        <option>Articulado</option>
-        <option>Executivo</option>
-      </select>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.lgpd_aceite}
+              onChange={(e) => setFormData(prev => ({ ...prev, lgpd_aceite: e.target.checked }))}
+            />
+            Aceito os termos da LGPD
+          </label>
 
-      <label className="block mb-2">Tipo de Serviço:</label>
-      <select name="tipo_servico" required className="w-full p-2 border rounded mb-4">
-        <option>Troncal</option>
-        <option>Alimentador</option>
-      </select>
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={formData.quer_retorno}
+              onChange={(e) => setFormData(prev => ({ ...prev, quer_retorno: e.target.checked }))}
+            />
+            Desejo receber retorno
+          </label>
+        </CardContent>
+      </Card>
 
-      <label className="block mb-2">Descrição:</label>
-      <textarea name="descricao" required minLength={20} className="w-full p-2 border rounded mb-4"></textarea>
-
-      <label className="block mb-2">Nome completo:</label>
-      <input type="text" name="nome_completo" required className="w-full p-2 border rounded mb-4" />
-
-      <label className="block mb-2">E-mail:</label>
-      <input type="email" name="email" required className="w-full p-2 border rounded mb-4" />
-
-      <label className="block mb-2">Telefone:</label>
-      <input type="tel" name="telefone" className="w-full p-2 border rounded mb-4" />
-
-      <label className="inline-flex items-center mb-4">
-        <input type="checkbox" name="lgpd_aceite" required className="mr-2" />
-        Aceito os termos da LGPD
-      </label>
-
-      <label className="inline-flex items-center mb-4 ml-4">
-        <input type="checkbox" name="quer_retorno" className="mr-2" />
-        Desejo receber retorno
-      </label>
-
-      <button type="submit" disabled={loading} className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full p-3 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
         {loading ? "Enviando..." : "Enviar Reclamação"}
       </button>
 
-      {successMsg && <p className="mt-4 p-2 bg-green-100 text-green-800 rounded">{successMsg}</p>}
-      {errorMsg && <p className="mt-4 p-2 bg-red-100 text-red-800 rounded">{errorMsg}</p>}
+      {successMsg && <p className="p-2 bg-green-100 text-green-800 rounded">{successMsg}</p>}
+      {errorMsg && <p className="p-2 bg-red-100 text-red-800 rounded">{errorMsg}</p>}
     </form>
   );
 }

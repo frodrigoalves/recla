@@ -1,18 +1,17 @@
 functionsDirectory = "C:\\Users\\Lenga\\Desktop\\topBus\\reclam\\2\\netlify\\functions"
 functionsDirectoryOrigin = "default"
+headersOrigin = "config"
 redirectsOrigin = "config"
 plugins = []
-headers = []
 
 [build]
 publish = "C:\\Users\\Lenga\\Desktop\\topBus\\reclam\\2\\dist"
 publishOrigin = "config"
 commandOrigin = "config"
-command = "npm run build"
+command = "vite build"
 functions = "C:\\Users\\Lenga\\Desktop\\topBus\\reclam\\2\\netlify\\functions"
 
 [build.environment]
-NODE_VERSION = "20"
 
 [build.processing]
 
@@ -29,6 +28,12 @@ NODE_VERSION = "20"
 [functions]
 
 [functions."*"]
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+Cache-Control = "public, max-age=0, must-revalidate"
 
 [[redirects]]
 from = "/*"
