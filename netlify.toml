@@ -11,3 +11,7 @@
   for = "/*"
     [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+[[edge_functions]]
+  path = "/api/reclamacao"
+  function = "reclamacao"
