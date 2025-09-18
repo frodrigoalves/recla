@@ -49,7 +49,6 @@ export default function NovaReclamacao() {
     []
   );
 
-  const SENTIDOS = useMemo(() => ["IDA", "VOLTA"], []);
   const TIPOS_ONIBUS = useMemo(() => ["Convencional", "Padrão", "Articulado"], []);
   const TIPOS_SERVICO = useMemo(() => ["Troncal", "Alimentador", "Circular", "Seletivo"], []);
 
@@ -63,7 +62,6 @@ export default function NovaReclamacao() {
     linha: "",
     numero_veiculo: "",
     local_ocorrencia: "",
-    sentido_viagem: "",
     tipo_onibus: "",
     tipo_servico: "",
     descricao: "",
@@ -141,7 +139,6 @@ export default function NovaReclamacao() {
     if (!form.data_hora_ocorrencia) e.data_hora_ocorrencia = "Informe data e hora.";
     if (!form.linha) e.linha = "Selecione a linha.";
     if (!form.local_ocorrencia) e.local_ocorrencia = "Informe o local.";
-    if (!form.sentido_viagem) e.sentido_viagem = "Selecione o sentido.";
     if (!form.tipo_onibus) e.tipo_onibus = "Selecione o tipo de veículo.";
     if (!form.tipo_servico) e.tipo_servico = "Selecione o tipo de serviço.";
     if (!form.descricao || form.descricao.trim().length < 20)
@@ -216,7 +213,6 @@ export default function NovaReclamacao() {
         linha: "",
         numero_veiculo: "",
         local_ocorrencia: "",
-        sentido_viagem: "",
         tipo_onibus: "",
         tipo_servico: "",
         descricao: "",
@@ -247,11 +243,6 @@ export default function NovaReclamacao() {
           <p className="text-sm md:text-lg text-slate-600 px-3">
             Registre sua reclamação sobre o transporte coletivo. Seus relatos nos ajudam a melhorar o serviço para toda a cidadania.
           </p>
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3 md:p-4 mx-2 md:mx-auto md:max-w-2xl">
-            <p className="text-green-700 text-xs md:text-sm">
-              Preencha todos os campos com atenção e guarde o protocolo exibido ao final do envio.
-            </p>
-          </div>
         </header>
 
         <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
@@ -355,25 +346,6 @@ export default function NovaReclamacao() {
                         }`}
                       />
                     </div>
-                  </Field>
-
-                  <Field label="Sentido da viagem" error={errors.sentido_viagem} dataFieldError={Boolean(errors.sentido_viagem)}>
-                    <select
-                      value={form.sentido_viagem}
-                      onChange={(e) => update("sentido_viagem", e.target.value)}
-                      className={`w-full rounded-lg border px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 ${
-                        errors.sentido_viagem
-                          ? "border-red-300 focus:ring-red-500"
-                          : "border-gray-300 focus:ring-blue-600"
-                      }`}
-                    >
-                      <option value="">Selecione...</option>
-                      {SENTIDOS.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
                   </Field>
 
                   <Field label="Tipo de ônibus" error={errors.tipo_onibus} dataFieldError={Boolean(errors.tipo_onibus)}>
@@ -535,6 +507,10 @@ export default function NovaReclamacao() {
                   </div>
                 </div>
               </Section>
+
+              <div className="rounded-lg border border-blue-100 bg-blue-50/80 px-4 py-3 text-xs text-blue-800">
+                O número de protocolo será exibido após o envio bem-sucedido. Anote-o para eventuais acompanhamentos.
+              </div>
 
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <p className="text-xs text-gray-500 flex items-start gap-2">
