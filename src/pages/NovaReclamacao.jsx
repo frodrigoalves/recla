@@ -50,7 +50,6 @@ export default function NovaReclamacao() {
   );
 
   const TIPOS_ONIBUS = useMemo(() => ["Convencional", "Padrão", "Articulado"], []);
-  const TIPOS_SERVICO = useMemo(() => ["Troncal", "Alimentador", "Circular", "Seletivo"], []);
 
   const [sending, setSending] = useState(false);
   const [resultMsg, setResultMsg] = useState("");
@@ -63,7 +62,7 @@ export default function NovaReclamacao() {
     numero_veiculo: "",
     local_ocorrencia: "",
     tipo_onibus: "",
-    tipo_servico: "",
+    tipo_servico: "OCULTO_NO_FRONT",
     descricao: "",
     anexos: [],
     quer_retorno: false,
@@ -140,7 +139,6 @@ export default function NovaReclamacao() {
     if (!form.linha) e.linha = "Selecione a linha.";
     if (!form.local_ocorrencia) e.local_ocorrencia = "Informe o local.";
     if (!form.tipo_onibus) e.tipo_onibus = "Selecione o tipo de veículo.";
-    if (!form.tipo_servico) e.tipo_servico = "Selecione o tipo de serviço.";
     if (!form.descricao || form.descricao.trim().length < 20)
       e.descricao = "Descreva o ocorrido com no mínimo 20 caracteres.";
     if (form.quer_retorno) {
@@ -214,7 +212,7 @@ export default function NovaReclamacao() {
         numero_veiculo: "",
         local_ocorrencia: "",
         tipo_onibus: "",
-        tipo_servico: "",
+        tipo_servico: "OCULTO_NO_FRONT",
         descricao: "",
         anexos: [],
         quer_retorno: false,
@@ -367,24 +365,6 @@ export default function NovaReclamacao() {
                     </select>
                   </Field>
 
-                  <Field label="Tipo de serviço" error={errors.tipo_servico} dataFieldError={Boolean(errors.tipo_servico)}>
-                    <select
-                      value={form.tipo_servico}
-                      onChange={(e) => update("tipo_servico", e.target.value)}
-                      className={`w-full rounded-lg border px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 ${
-                        errors.tipo_servico
-                          ? "border-red-300 focus:ring-red-500"
-                          : "border-gray-300 focus:ring-blue-600"
-                      }`}
-                    >
-                      <option value="">Selecione...</option>
-                      {TIPOS_SERVICO.map((t) => (
-                        <option key={t} value={t}>
-                          {t}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
                 </div>
               </Section>
 
