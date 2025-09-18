@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ClipboardList,
   FileText,
@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   AlertCircle,
 } from "lucide-react";
+import { enviarReclamacaoFormData } from "../api/reclamacao";
 
 // Página pública de reclamações – experiência em página única
 export default function NovaReclamacao() {
@@ -51,6 +52,11 @@ export default function NovaReclamacao() {
 
   const TIPOS_ONIBUS = useMemo(() => ["Convencional", "Padrão", "Articulado"], []);
 
+  const MB15 = 15 * 1024 * 1024;
+  const formRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const [linkDraft, setLinkDraft] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState([]);
   const [sending, setSending] = useState(false);
   const [resultMsg, setResultMsg] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
@@ -61,6 +67,7 @@ export default function NovaReclamacao() {
     linha: "",
     numero_veiculo: "",
     local_ocorrencia: "",
+    sentido_viagem: "",
     tipo_onibus: "",
     tipo_servico: "OCULTO_NO_FRONT",
     descricao: "",
@@ -103,7 +110,15 @@ export default function NovaReclamacao() {
   }
 
   function update(field, value) {
-    setForm((prev) => ({ ...prev, [field]: value }));
+    setForm((prev) => {
+      const next = { ...prev, [field]: value };
+      if (field === "quer_retorno" && !value) {
+        next.nome_completo = "";
+        next.email = "";
+        next.telefone = "";
+      }
+      return next;
+    });
     setErrors((prev) => {
       if (!prev[field] && field !== "email" && field !== "telefone" && field !== "quer_retorno") {
         return prev;
@@ -122,14 +137,37 @@ export default function NovaReclamacao() {
   }
 
   function addAnexo(url) {
-    if (!url) return;
-    update("anexos", [...form.anexos, url.trim()]);
+    const trimmed = url.trim();
+    if (!trimmed) return false;
+    try {
+      new URL(trimmed);
+    } catch {
+      setErrors((prev) => ({ ...prev, anexos: "Informe um link público válido." }));
+      return false;
+    }
+    if (form.anexos.includes(trimmed)) {
+      setErrors((prev) => ({ ...prev, anexos: "Este link já foi adicionado." }));
+      return false;
+    }
+    update("anexos", [...form.anexos, trimmed]);
+    clearAnexoError();
+    return true;
   }
 
   function removeAnexo(idx) {
     const copy = [...form.anexos];
     copy.splice(idx, 1);
     update("anexos", copy);
+    clearAnexoError();
+  }
+
+  function clearAnexoError() {
+    setErrors((prev) => {
+      if (!prev.anexos) return prev;
+      const next = { ...prev };
+      delete next.anexos;
+      return next;
+    });
   }
 
   function validateForm() {
@@ -169,6 +207,19 @@ export default function NovaReclamacao() {
       return;
     }
 
+    const files = Array.from(fileInputRef.current?.files || []);
+    const oversize = files.filter((file) => file.size > MB15);
+    if (oversize.length > 0) {
+      const nomes = oversize.map((file) => file.name).join(", ");
+      setErrors((prev) => ({
+        ...prev,
+        anexos: `Os arquivos acima de 15 MB não podem ser enviados (${nomes}).`,
+      }));
+      setResultMsg("Um ou mais anexos ultrapassam o limite de 15 MB.");
+      setShowSuccess(false);
+      return;
+    }
+
     const prazo = new Date();
     prazo.setDate(prazo.getDate() + 7);
 
@@ -177,26 +228,51 @@ export default function NovaReclamacao() {
 
     try {
       const currentProtocolo = form.protocolo;
-      const payload = { ...form, prazo_sla: prazo.toISOString() };
+      const fd = new FormData();
+      fd.append("protocolo", currentProtocolo);
+      fd.append("assunto", form.assunto);
+      fd.append("data_hora_ocorrencia", form.data_hora_ocorrencia);
+      fd.append("linha", form.linha);
+      fd.append("numero_veiculo", form.numero_veiculo);
+      fd.append("local_ocorrencia", form.local_ocorrencia);
+      fd.append("sentido_viagem", form.sentido_viagem || "");
+      fd.append("tipo_onibus", form.tipo_onibus);
+      fd.append("tipo_servico", form.tipo_servico);
+      fd.append("descricao", form.descricao);
+      fd.append("status", form.status);
+      fd.append("prazo_sla", prazo.toISOString());
+      fd.append("quer_retorno", form.quer_retorno ? "true" : "false");
+      fd.append("nome_completo", form.nome_completo);
+      fd.append("email", form.email);
+      fd.append("telefone", form.telefone);
+      fd.append("lgpd_aceite", form.lgpd_aceite ? "true" : "false");
+      fd.append("ip", form.ip);
 
-      const res = await fetch(import.meta.env.VITE_APPSCRIPT_URL, {
-        method: "POST",
-        body: JSON.stringify(payload),
+      files.forEach((file) => {
+        fd.append("anexos", file);
       });
-
-      if (!res.ok) {
-        throw new Error("Resposta inválida");
+      if (form.anexos.length > 0) {
+        fd.append("anexos", JSON.stringify(form.anexos));
       }
 
-      let data;
-      try {
-        data = await res.json();
-      } catch {
-        data = null;
+      const data = await enviarReclamacaoFormData(fd);
+
+      if (!data?.ok) {
+        if (data?.code === "FILE_TOO_LARGE") {
+          setErrors((prev) => ({
+            ...prev,
+            anexos: "Algum arquivo ultrapassou o limite de 15 MB no servidor.",
+          }));
+          setResultMsg("Algum arquivo ultrapassou 15 MB e foi bloqueado.");
+        } else {
+          setResultMsg(data?.error || data?.code || "Não foi possível enviar agora.");
+        }
+        setShowSuccess(false);
+        return;
       }
 
       const protocoloOficial =
-        data?.protocolo ?? data?.Protocolo ?? data?.result?.protocolo ?? null;
+        data?.protocolo ?? data?.Protocolo ?? data?.result?.protocolo ?? currentProtocolo;
 
       setLastProtocolo(protocoloOficial || currentProtocolo);
       setResultMsg("Reclamação registrada com sucesso!");
@@ -211,6 +287,7 @@ export default function NovaReclamacao() {
         linha: "",
         numero_veiculo: "",
         local_ocorrencia: "",
+        sentido_viagem: "",
         tipo_onibus: "",
         tipo_servico: "OCULTO_NO_FRONT",
         descricao: "",
@@ -224,6 +301,11 @@ export default function NovaReclamacao() {
         prazo_sla: "",
         ip: form.ip,
       });
+      setSelectedFiles([]);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      setLinkDraft("");
     } catch {
       setResultMsg("Não foi possível enviar. Tente novamente em instantes.");
     } finally {
@@ -254,7 +336,7 @@ export default function NovaReclamacao() {
               }}
             />
           ) : (
-            <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
+            <form ref={formRef} onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
               {resultMsg && (
                 <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                   {resultMsg}
@@ -394,8 +476,23 @@ export default function NovaReclamacao() {
                     <div className="flex justify-end text-xs text-gray-500 mt-1">{form.descricao.length}/1000</div>
                   </Field>
 
-                  <Field label="Anexos (URLs públicas de imagens, vídeos ou documentos)">
-                    <Anexos anexos={form.anexos} onAdd={addAnexo} onRemove={removeAnexo} />
+                  <Field
+                    label="Anexos"
+                    hint="Até 15 MB por arquivo. Você pode anexar arquivos de mídia ou indicar links públicos."
+                    error={errors.anexos}
+                    dataFieldError={Boolean(errors.anexos)}
+                  >
+                    <Anexos
+                      fileInputRef={fileInputRef}
+                      files={selectedFiles}
+                      onFilesChange={setSelectedFiles}
+                      linkDraft={linkDraft}
+                      onLinkDraftChange={setLinkDraft}
+                      anexos={form.anexos}
+                      onAdd={addAnexo}
+                      onRemove={removeAnexo}
+                      onClearError={clearAnexoError}
+                    />
                   </Field>
                 </div>
               </Section>
@@ -562,45 +659,101 @@ function Success({ protocolo, message, onNew }) {
   );
 }
 
-function Anexos({ anexos, onAdd, onRemove }) {
-  const [url, setUrl] = useState("");
+function Anexos({
+  fileInputRef,
+  files,
+  onFilesChange,
+  linkDraft,
+  onLinkDraftChange,
+  anexos,
+  onAdd,
+  onRemove,
+  onClearError,
+}) {
+  const handleFileChange = (event) => {
+    const nextFiles = Array.from(event.target?.files || []);
+    onFilesChange(nextFiles);
+    onClearError?.();
+  };
+
+  const handleAddLink = () => {
+    const success = onAdd(linkDraft);
+    if (success) {
+      onLinkDraftChange("");
+    }
+  };
+
+  const formatFileSize = (size) => {
+    if (!size && size !== 0) return "";
+    if (size >= 1024 * 1024) {
+      return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+    }
+    if (size >= 1024) {
+      return `${(size / 1024).toFixed(1)} KB`;
+    }
+    return `${size} B`;
+  };
 
   return (
-    <div>
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <input
+          ref={fileInputRef}
+          id="anexos"
+          name="anexos"
+          type="file"
+          multiple
+          accept="image/*,audio/*,video/*"
+          onChange={handleFileChange}
+          className="block w-full cursor-pointer rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        />
+        {files.length > 0 && (
+          <ul className="space-y-1 text-sm text-gray-600">
+            {files.map((file) => (
+              <li
+                key={`${file.name}-${file.lastModified}`}
+                className="flex items-center justify-between gap-3 rounded border border-gray-200 bg-gray-50 px-3 py-1.5"
+              >
+                <span className="truncate" title={file.name}>
+                  {file.name}
+                </span>
+                <span className="text-xs text-gray-400">{formatFileSize(file.size)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
       <div className="flex flex-col gap-2 sm:flex-row">
         <input
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="Cole a URL pública do anexo"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+          value={linkDraft}
+          onChange={(e) => onLinkDraftChange(e.target.value)}
+          placeholder="Cole um link público (opcional)"
+          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
         />
         <button
           type="button"
-          onClick={() => {
-            onAdd(url);
-            setUrl("");
-          }}
-          className="rounded-lg px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200"
+          onClick={handleAddLink}
+          className="inline-flex items-center justify-center rounded-lg bg-gray-900/10 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-900/20"
         >
-          Adicionar
+          Adicionar link
         </button>
       </div>
+
       {anexos?.length > 0 && (
-        <ul className="mt-3 space-y-2">
+        <ul className="space-y-2 text-sm">
           {anexos.map((u, i) => (
-            <li key={i} className="flex items-center justify-between gap-3 bg-gray-50 px-3 py-2 rounded border border-gray-200">
-              <a
-                href={u}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 underline truncate"
-              >
+            <li
+              key={u}
+              className="flex items-center justify-between gap-3 rounded border border-blue-100 bg-blue-50/70 px-3 py-2"
+            >
+              <a href={u} target="_blank" rel="noreferrer" className="truncate text-blue-700 underline">
                 {u}
               </a>
               <button
                 type="button"
                 onClick={() => onRemove(i)}
-                className="text-sm text-red-600 hover:underline"
+                className="text-xs font-medium text-red-600 hover:underline"
               >
                 Remover
               </button>
