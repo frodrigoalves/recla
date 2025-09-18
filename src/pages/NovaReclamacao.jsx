@@ -53,6 +53,8 @@ export default function NovaReclamacao() {
   const TIPOS_ONIBUS = useMemo(() => ["Convencional", "Padrão", "Articulado"], []);
 
   const MB15 = 15 * 1024 * 1024;
+  const SENTIDO_PADRAO = "NAO_COLETADO_NO_FRONT";
+  const TIPO_SERVICO_PADRAO = "OCULTO_NO_FRONT";
   const formRef = useRef(null);
   const fileInputRef = useRef(null);
   const [linkDraft, setLinkDraft] = useState("");
@@ -67,9 +69,7 @@ export default function NovaReclamacao() {
     linha: "",
     numero_veiculo: "",
     local_ocorrencia: "",
-    sentido_viagem: "",
     tipo_onibus: "",
-    tipo_servico: "OCULTO_NO_FRONT",
     descricao: "",
     anexos: [],
     quer_retorno: false,
@@ -235,9 +235,9 @@ export default function NovaReclamacao() {
       fd.append("linha", form.linha);
       fd.append("numero_veiculo", form.numero_veiculo);
       fd.append("local_ocorrencia", form.local_ocorrencia);
-      fd.append("sentido_viagem", form.sentido_viagem || "");
+      fd.append("sentido_viagem", SENTIDO_PADRAO);
       fd.append("tipo_onibus", form.tipo_onibus);
-      fd.append("tipo_servico", form.tipo_servico);
+      fd.append("tipo_servico", TIPO_SERVICO_PADRAO);
       fd.append("descricao", form.descricao);
       fd.append("status", form.status);
       fd.append("prazo_sla", prazo.toISOString());
@@ -287,9 +287,7 @@ export default function NovaReclamacao() {
         linha: "",
         numero_veiculo: "",
         local_ocorrencia: "",
-        sentido_viagem: "",
         tipo_onibus: "",
-        tipo_servico: "OCULTO_NO_FRONT",
         descricao: "",
         anexos: [],
         quer_retorno: false,
