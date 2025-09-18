@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ClipboardList, FileText, ShieldCheck, ArrowLeft, ArrowRight, Upload, MapPin, Bus, Mail, Phone, CheckCircle2, AlertCircle } from "lucide-react";
 
 // Página pública de reclamações  layout e UX equivalentes ao modelo fornecido
@@ -39,6 +39,10 @@ export default function NovaReclamacao() {
     []
   );
 
+  const SENTIDOS = useMemo(() => ["IDA", "VOLTA"], []);
+  const TIPOS_ONIBUS = useMemo(() => ["Convencional", "MOVE", "Suplementar"], []);
+  const TIPOS_SERVICO = useMemo(() => ["Troncal", "Alimentador", "Circular", "Seletivo"], []);
+
   // Estado
   const [step, setStep] = useState(1);
   const [sending, setSending] = useState(false);
@@ -50,7 +54,9 @@ export default function NovaReclamacao() {
     linha: "",
     numero_veiculo: "",
     local_ocorrencia: "",
-    
+    sentido_viagem: "",
+    tipo_onibus: "",
+    tipo_servico: "",
     descricao: "",
     anexos: [],
     quer_retorno: false,
@@ -60,9 +66,31 @@ export default function NovaReclamacao() {
     lgpd_aceite: false,
     status: "Pendente",
     prazo_sla: "",
+    ip: "IP_NAO_DETECTADO",
   });
   const [errors, setErrors] = useState({});
   const [lastProtocolo, setLastProtocolo] = useState(form.protocolo);
+
+  useEffect(() => {
+    let active = true;
+
+    fetch("https://api.ipify.org?format=json")
+      .then((res) => (res.ok ? res.json() : Promise.reject()))
+      .then((data) => {
+        if (active && data?.ip) {
+          setForm((prev) => ({ ...prev, ip: data.ip }));
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setForm((prev) => ({ ...prev, ip: "IP_NAO_DETECTADO" }));
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function makeProtocolo() {
     return `TOP-${Date.now()}`; // idêntico ao modelo em formato
@@ -90,10 +118,12 @@ export default function NovaReclamacao() {
       if (!form.assunto) e.assunto = "Selecione um assunto.";
       if (!form.data_hora_ocorrencia) e.data_hora_ocorrencia = "Informe data e hora.";
       if (!form.linha) e.linha = "Selecione a linha.";
-      
       if (!form.local_ocorrencia) e.local_ocorrencia = "Informe o local.";
+      if (!form.sentido_viagem) e.sentido_viagem = "Selecione o sentido.";
     }
     if (s === 2) {
+      if (!form.tipo_onibus) e.tipo_onibus = "Selecione o tipo de veículo.";
+      if (!form.tipo_servico) e.tipo_servico = "Selecione o tipo de serviço.";
       if (!form.descricao || form.descricao.trim().length < 20)
         e.descricao = "Mínimo de 20 caracteres.";
     }
@@ -167,7 +197,9 @@ export default function NovaReclamacao() {
         linha: "",
         numero_veiculo: "",
         local_ocorrencia: "",
-
+        sentido_viagem: "",
+        tipo_onibus: "",
+        tipo_servico: "",
         descricao: "",
         anexos: [],
         quer_retorno: false,
@@ -177,6 +209,7 @@ export default function NovaReclamacao() {
         lgpd_aceite: false,
         status: "Pendente",
         prazo_sla: "",
+        ip: form.ip,
       });
       setStep(4);
     } catch {
@@ -217,8 +250,27 @@ export default function NovaReclamacao() {
 
           {/* Form content */}
           <form onSubmit={handleSubmit} className="p-6 space-y-8">
-            {step === 1 && <StepDados form={form} update={update} errors={errors} ASSUNTOS={ASSUNTOS} LINHAS={LINHAS} />}
-            {step === 2 && <StepDescricao form={form} update={update} errors={errors} addAnexo={addAnexo} removeAnexo={removeAnexo} />}
+            {step === 1 && (
+              <StepDados
+                form={form}
+                update={update}
+                errors={errors}
+                ASSUNTOS={ASSUNTOS}
+                LINHAS={LINHAS}
+                SENTIDOS={SENTIDOS}
+              />
+            )}
+            {step === 2 && (
+              <StepDescricao
+                form={form}
+                update={update}
+                errors={errors}
+                TIPOS_ONIBUS={TIPOS_ONIBUS}
+                TIPOS_SERVICO={TIPOS_SERVICO}
+                addAnexo={addAnexo}
+                removeAnexo={removeAnexo}
+              />
+            )}
             {step === 3 && <StepContato form={form} update={update} errors={errors} />}
             {step === 4 && (
               <Success
@@ -302,7 +354,7 @@ function Field({ label, hint, error, children }) {
   );
 }
 
-function StepDados({ form, update, errors, ASSUNTOS, LINHAS }) {
+function StepDados({ form, update, errors, ASSUNTOS, LINHAS, SENTIDOS }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
       <Field label="Protocolo">
@@ -376,13 +428,58 @@ function StepDados({ form, update, errors, ASSUNTOS, LINHAS }) {
         </div>
       </Field>
 
+      <Field label="Sentido da viagem" error={errors.sentido_viagem}>
+        <select
+          value={form.sentido_viagem}
+          onChange={(e) => update("sentido_viagem", e.target.value)}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        >
+          <option value="">Selecione...</option>
+          {SENTIDOS.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </Field>
+
     </section>
   );
 }
 
-function StepDescricao({ form, update, errors, addAnexo, removeAnexo }) {
+function StepDescricao({ form, update, errors, TIPOS_ONIBUS, TIPOS_SERVICO, addAnexo, removeAnexo }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <Field label="Tipo de veículo" error={errors.tipo_onibus}>
+        <select
+          value={form.tipo_onibus}
+          onChange={(e) => update("tipo_onibus", e.target.value)}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        >
+          <option value="">Selecione...</option>
+          {TIPOS_ONIBUS.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+      </Field>
+
+      <Field label="Tipo de serviço" error={errors.tipo_servico}>
+        <select
+          value={form.tipo_servico}
+          onChange={(e) => update("tipo_servico", e.target.value)}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        >
+          <option value="">Selecione...</option>
+          {TIPOS_SERVICO.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+      </Field>
+
       <div className="md:col-span-2">
         <Field label="Descrição detalhada" error={errors.descricao} hint="Mínimo 20 caracteres. Evite dados pessoais.">
           <textarea

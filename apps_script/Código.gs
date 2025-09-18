@@ -1,5 +1,5 @@
 /** ===== CONFIG ===== **/
-const SHEET_ID     = '1N-T6z_FH2EizaW3WOE6Pnr7tpASiIMTaHewc1N2ozTI';
+const SHEET_ID     = '14sYnGGtCufCsZPxJVXGznurB3zL4cbyFWLE6wcPTA54';
 const SHEET_NAME   = 'Publico';
 const PROTO_PREFIX = 'TOP-';
 const COLS = [
@@ -15,7 +15,7 @@ function doPost(e) {
     }
     const d = JSON.parse(e.postData.contents);
     const proto = PROTO_PREFIX + Date.now();
-    const ip = e?.context?.clientIp || e?.parameter?.ip || 'N/A';
+    const ip = d.ip || e?.context?.clientIp || e?.parameter?.ip || 'IP_NAO_DETECTADO';
     const sh = _sheet();
     const anexosStr = Array.isArray(d.anexos) ? d.anexos.join(' ') : (d.anexos || '');
     const row = [
