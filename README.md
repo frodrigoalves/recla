@@ -6,7 +6,7 @@ Este repositório (`/workspace/recla`) hospeda o front-end Vite/React e o Apps S
 
 - Node.js 20.x e npm atualizado (`npm i -g npm@latest`).
 - Acesso ao Netlify com o site já criado (neste guia usamos `https://recla.netlify.app`).
-- Apps Script publicado como Web App acessível pelo endpoint `https://script.google.com/macros/s/AKfycbyRBQpQOllUP-6p7fDin_SDWAABBoO8FiKnDNtkWJ_t0BLnDGzuTTAwk0WhyMQM5P9o/exec`.
+- Apps Script publicado como Web App acessível pelo endpoint `https://script.google.com/macros/s/AKfycbwqYPYvfZiJkmqagVrS5xQvM8jfqkN6LtJ9e3L7GiB0gxzbZrjRBwLLtkA0HoljNafazw/exec`.
 - `netlify-cli` instalado e autenticado (`npm i -g netlify-cli && netlify login`).
 
 > Dica: se estiver atrás de proxy, configure `npm config set proxy ...` e `npm config set https-proxy ...` antes de instalar dependências.
@@ -160,7 +160,7 @@ git push origin main
 # 6) Netlify — linkar, setar variável GAS_URL e disparar deploy
 # ==============================================================================
 netlify link || true
-netlify env:set GAS_URL "https://script.google.com/macros/s/AKfycbyRBQpQOllUP-6p7fDin_SDWAABBoO8FiKnDNtkWJ_t0BLnDGzuTTAwk0WhyMQM5P9o/exec"
+netlify env:set GAS_URL "https://script.google.com/macros/s/AKfycbwqYPYvfZiJkmqagVrS5xQvM8jfqkN6LtJ9e3L7GiB0gxzbZrjRBwLLtkA0HoljNafazw/exec"
 netlify deploy --prod --build
 
 # ===========================
@@ -321,7 +321,7 @@ git push origin main
 # 6) Netlify — linkar, setar GAS_URL e deploy
 # ==============================================================================
 netlify link
-netlify env:set GAS_URL "https://script.google.com/macros/s/AKfycbyRBQpQOllUP-6p7fDin_SDWAABBoO8FiKnDNtkWJ_t0BLnDGzuTTAwk0WhyMQM5P9o/exec"
+netlify env:set GAS_URL "https://script.google.com/macros/s/AKfycbwqYPYvfZiJkmqagVrS5xQvM8jfqkN6LtJ9e3L7GiB0gxzbZrjRBwLLtkA0HoljNafazw/exec"
 netlify deploy --prod --build
 
 # ===========================
