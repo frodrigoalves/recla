@@ -178,8 +178,7 @@ function handleReclamacaoJson_(payload, now, ip) {
   }
 
   const proto = RECLAM_PROTO_PREFIX + Date.now();
-  const anexos = normalizeAnexosInput_(payload?.anexos);
-  return appendReclamacao_(normalized, anexos, proto, now);
+  return appendReclamacao_(normalized, [], proto, now);
 }
 
 function buildReclamacaoPayload_(source, fallbackIp) {
@@ -282,38 +281,6 @@ function uploadReclamacaoFiles_(files, proto, now) {
   });
 
   return urls;
-}
-
-function normalizeAnexosInput_(input) {
-  if (!input) {
-    return [];
-  }
-
-  if (Array.isArray(input)) {
-    return input
-      .map((value) => String(value || '').trim())
-      .filter(Boolean);
-  }
-
-  if (typeof input === 'string') {
-    const trimmed = input.trim();
-    if (!trimmed) {
-      return [];
-    }
-
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (Array.isArray(parsed)) {
-        return normalizeAnexosInput_(parsed);
-      }
-    } catch (err) {
-      // segue fluxo original quando não é JSON
-    }
-
-    return [trimmed];
-  }
-
-  return [];
 }
 
 function getReclamSheet_() {
