@@ -165,9 +165,7 @@ function handleReclamacaoMultipart_(e, now, ip) {
   }
 
   const proto = RECLAM_PROTO_PREFIX + Date.now();
-  const anexosUploads = uploadReclamacaoFiles_(e.files, proto, now);
-  const extraLinks = normalizeAnexosInput_(e?.parameter?.anexos);
-  const anexos = anexosUploads.concat(extraLinks);
+  const anexos = uploadReclamacaoFiles_(e.files, proto, now);
 
   return appendReclamacao_(payload, anexos, proto, now);
 }
