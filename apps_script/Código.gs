@@ -165,7 +165,9 @@ function handleReclamacaoMultipart_(e, now, ip) {
   }
 
   const proto = RECLAM_PROTO_PREFIX + Date.now();
-  const anexos = uploadReclamacaoFiles_(e.files, proto, now);
+  const anexosUploads = uploadReclamacaoFiles_(e.files, proto, now);
+  const extraLinks = normalizeAnexosInput_(e?.parameter?.anexos);
+  const anexos = anexosUploads.concat(extraLinks);
 
   return appendReclamacao_(payload, anexos, proto, now);
 }
@@ -178,7 +180,8 @@ function handleReclamacaoJson_(payload, now, ip) {
   }
 
   const proto = RECLAM_PROTO_PREFIX + Date.now();
-  return appendReclamacao_(normalized, [], proto, now);
+  const anexos = normalizeAnexosInput_(payload?.anexos);
+  return appendReclamacao_(normalized, anexos, proto, now);
 }
 
 function buildReclamacaoPayload_(source, fallbackIp) {
@@ -281,6 +284,38 @@ function uploadReclamacaoFiles_(files, proto, now) {
   });
 
   return urls;
+}
+
+function normalizeAnexosInput_(input) {
+  if (input === undefined || input === null) {
+    return [];
+  }
+
+  if (Array.isArray(input)) {
+    return input
+      .map((value) => String(value || '').trim())
+      .filter(Boolean);
+  }
+
+  if (typeof input === 'string') {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return normalizeAnexosInput_(parsed);
+      }
+    } catch (err) {
+      // segue fluxo com o valor original
+    }
+
+    return [trimmed];
+  }
+
+  return [];
 }
 
 function getReclamSheet_() {
