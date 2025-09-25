@@ -4,18 +4,29 @@ import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
 export default function PainelPublico() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const sheetUrl = import.meta.env.VITE_SHEET_GVIZ;
 
   useEffect(() => {
-    fetch(import.meta.env.VITE_SHEET_GVIZ)
+    if (!sheetUrl) {
+      setError("URL da planilha não configurada.");
+      setLoading(false);
+      return;
+    }
+
+    fetch(sheetUrl)
       .then((res) => res.text())
       .then((t) => {
         const json = JSON.parse(t.substring(47, t.length - 2));
         const R = json.table.rows.map((r) => r.c.map((c) => (c ? c.v : "")));
         setRows(R);
       })
-      .catch(() => setRows([]))
+      .catch(() => {
+        setRows([]);
+        setError("Não foi possível carregar os dados.");
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [sheetUrl]);
 
   const total = rows.length;
   const pendentes = rows.filter((r) => !r[11] || r[11] === "Pendente").length;
@@ -76,6 +87,8 @@ export default function PainelPublico() {
       <section className="overflow-x-auto bg-white shadow rounded-xl">
         {loading ? (
           <div className="p-8 text-center text-gray-500 animate-pulse">Carregando registros...</div>
+        ) : error ? (
+          <div className="p-8 text-center text-red-500">{error}</div>
         ) : rows.length === 0 ? (
           <div className="p-8 text-center text-gray-500">Nenhum registro encontrado.</div>
         ) : (
