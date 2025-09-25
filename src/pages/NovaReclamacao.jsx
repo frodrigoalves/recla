@@ -84,17 +84,13 @@ export default function NovaReclamacao() {
 
   function update(field, value) {
     if (field === "anexos") {
-      const isFile = (item) => {
+      const isFileObject = (item) => {
+        if (!item) return false;
         if (typeof File !== "undefined" && item instanceof File) return true;
-        return (
-          item &&
-          typeof item === "object" &&
-          typeof item.name === "string" &&
-          typeof item.size === "number"
-        );
+        return Object.prototype.toString.call(item) === "[object File]";
       };
 
-      const nextFiles = Array.isArray(value) ? value.filter(isFile) : [];
+      const nextFiles = Array.isArray(value) ? value.filter(isFileObject) : [];
       setForm((prev) => ({ ...prev, anexos: nextFiles }));
       return;
     }
@@ -502,7 +498,8 @@ function StepDescricao({ form, update, errors }) {
         <Field label="Anexos (até 15 MB por arquivo)">
           <AnexosUpload key={form.protocolo} data={form} onChange={update} />
           <p className="text-xs text-gray-500 mt-1">
-            São aceitos arquivos de imagem, áudio ou vídeo enviados diretamente pelo formulário.
+            São aceitos somente arquivos de imagem, áudio ou vídeo enviados diretamente pelo formulário;
+            links públicos não são registrados.
           </p>
         </Field>
       </div>

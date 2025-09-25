@@ -1,15 +1,13 @@
 import React from "react";
 
+const isFileObject = (item) => {
+  if (!item) return false;
+  if (typeof File !== "undefined" && item instanceof File) return true;
+  return Object.prototype.toString.call(item) === "[object File]";
+};
+
 export default function AnexosUpload({ data, onChange }) {
-  const isFile = (item) => {
-    if (typeof File !== "undefined" && item instanceof File) return true;
-    return (
-      item &&
-      typeof item === "object" &&
-      typeof item.name === "string" &&
-      typeof item.size === "number"
-    );
-  };
+  const isFile = isFileObject;
 
   const isAllowedType = (file) => {
     const type = (file?.type || "").toLowerCase();
