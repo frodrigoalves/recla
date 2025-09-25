@@ -1,5 +1,6 @@
-﻿import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ClipboardList, FileText, ShieldCheck, ArrowLeft, ArrowRight, Upload, MapPin, Bus, Mail, Phone, CheckCircle2, AlertCircle } from "lucide-react";
+import AnexosUpload from "../components/AnexosUpload";
 
 // Página pública de reclamações  layout e UX equivalentes ao modelo fornecido
 export default function NovaReclamacao() {
@@ -69,18 +70,23 @@ export default function NovaReclamacao() {
   }
 
   function update(field, value) {
+    if (field === "anexos") {
+      const isFile = (item) => {
+        if (typeof File !== "undefined" && item instanceof File) return true;
+        return (
+          item &&
+          typeof item === "object" &&
+          typeof item.name === "string" &&
+          typeof item.size === "number"
+        );
+      };
+
+      const nextFiles = Array.isArray(value) ? value.filter(isFile) : [];
+      setForm((prev) => ({ ...prev, anexos: nextFiles }));
+      return;
+    }
+
     setForm((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function addAnexo(url) {
-    if (!url) return;
-    update("anexos", [...form.anexos, url.trim()]);
-  }
-
-  function removeAnexo(idx) {
-    const copy = [...form.anexos];
-    copy.splice(idx, 1);
-    update("anexos", copy);
   }
 
   // Validação por etapa (espelha as regras do modelo)
@@ -134,12 +140,42 @@ export default function NovaReclamacao() {
 
     try {
       const currentProtocolo = form.protocolo;
-      const payload = { ...form, prazo_sla: prazo.toISOString() };
+      const payload = {
+        assunto: form.assunto,
+        data_hora_ocorrencia: form.data_hora_ocorrencia,
+        linha: form.linha,
+        numero_veiculo: form.numero_veiculo,
+        local_ocorrencia: form.local_ocorrencia,
+        descricao: form.descricao,
+        quer_retorno: form.quer_retorno,
+        nome_completo: form.nome_completo,
+        email: form.email,
+        telefone: form.telefone,
+        lgpd_aceite: form.lgpd_aceite,
+        status: form.status,
+        prazo_sla: prazo.toISOString(),
+      };
+
+      const formData = new FormData();
+      Object.entries(payload).forEach(([key, value]) => {
+        if (value === undefined || value === null) return;
+        if (typeof value === "boolean") {
+          formData.append(key, value ? "true" : "false");
+        } else {
+          formData.append(key, value);
+        }
+      });
+
+      (form.anexos || []).forEach((file, idx) => {
+        if (file) {
+          formData.append(`arquivo${idx + 1}`, file);
+        }
+      });
 
       // Apps Script (sem headers p/ evitar preflight CORS)
       const res = await fetch(import.meta.env.VITE_APPSCRIPT_URL, {
         method: "POST",
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       if (!res.ok) {
@@ -218,7 +254,7 @@ export default function NovaReclamacao() {
           {/* Form content */}
           <form onSubmit={handleSubmit} className="p-6 space-y-8">
             {step === 1 && <StepDados form={form} update={update} errors={errors} ASSUNTOS={ASSUNTOS} LINHAS={LINHAS} />}
-            {step === 2 && <StepDescricao form={form} update={update} errors={errors} addAnexo={addAnexo} removeAnexo={removeAnexo} />}
+            {step === 2 && <StepDescricao form={form} update={update} errors={errors} />}
             {step === 3 && <StepContato form={form} update={update} errors={errors} />}
             {step === 4 && (
               <Success
@@ -380,7 +416,7 @@ function StepDados({ form, update, errors, ASSUNTOS, LINHAS }) {
   );
 }
 
-function StepDescricao({ form, update, errors, addAnexo, removeAnexo }) {
+function StepDescricao({ form, update, errors }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div className="md:col-span-2">
@@ -397,9 +433,9 @@ function StepDescricao({ form, update, errors, addAnexo, removeAnexo }) {
       </div>
 
       <div className="md:col-span-2">
-        <Field label="Anexos (URLs públicas de imagens/vídeos/documentos)">
-          <Anexos anexos={form.anexos} onAdd={addAnexo} onRemove={removeAnexo} />
-          <p className="text-xs text-gray-500 mt-1">Dica: suba no Google Drive/Imgur e cole o link compartilhável.</p>
+        <Field label="Anexos (até 15 MB por arquivo)">
+          <AnexosUpload key={form.protocolo} data={form} onChange={update} />
+          <p className="text-xs text-gray-500 mt-1">São aceitos arquivos de imagem, áudio ou vídeo enviados diretamente pelo formulário.</p>
         </Field>
       </div>
     </section>
@@ -499,51 +535,3 @@ function Success({ protocolo, resultMsg, onNew }) {
   );
 }
 
-function Anexos({ anexos, onAdd, onRemove }) {
-  const [url, setUrl] = useState("");
-  return (
-    <div>
-      <div className="flex gap-2">
-        <input
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="Cole a URL pública do anexo"
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-        />
-        <button
-          type="button"
-          onClick={() => {
-            onAdd(url);
-            setUrl("");
-          }}
-          className="rounded-lg px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200"
-        >
-          Adicionar
-        </button>
-      </div>
-      {anexos?.length > 0 && (
-        <ul className="mt-3 space-y-2">
-          {anexos.map((u, i) => (
-            <li key={i} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded">
-              <a
-                href={u}
-                target="_blank"
-                rel="noreferrer"
-                className="text-blue-600 underline truncate max-w-[75%]"
-              >
-                {u}
-              </a>
-              <button
-                type="button"
-                onClick={() => onRemove(i)}
-                className="text-sm text-red-600 hover:underline"
-              >
-                Remover
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
