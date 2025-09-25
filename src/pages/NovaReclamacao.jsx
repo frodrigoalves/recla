@@ -2,6 +2,8 @@ import React, { useMemo, useState } from "react";
 import { ClipboardList, FileText, ShieldCheck, ArrowLeft, ArrowRight, Upload, MapPin, Bus, Mail, Phone, CheckCircle2, AlertCircle } from "lucide-react";
 import AnexosUpload from "../components/AnexosUpload";
 
+const APPSCRIPT_ENDPOINT = (import.meta.env.VITE_APPSCRIPT_URL || "").trim();
+
 // Página pública de reclamações  layout e UX equivalentes ao modelo fornecido
 export default function NovaReclamacao() {
   // Opções (podem ser expandidas depois)
@@ -64,6 +66,7 @@ export default function NovaReclamacao() {
   });
   const [errors, setErrors] = useState({});
   const [lastProtocolo, setLastProtocolo] = useState(form.protocolo);
+  const missingGasEndpoint = !APPSCRIPT_ENDPOINT;
 
   function makeProtocolo() {
     return `TOP-${Date.now()}`; // idêntico ao modelo em formato
@@ -139,6 +142,13 @@ export default function NovaReclamacao() {
     setResultMsg("");
 
     try {
+      if (missingGasEndpoint) {
+        setResultMsg(
+          "Configuração ausente: defina a variável VITE_APPSCRIPT_URL com a URL do Apps Script antes de enviar a reclamação."
+        );
+        return;
+      }
+
       const currentProtocolo = form.protocolo;
       const payload = {
         assunto: form.assunto,
@@ -173,7 +183,7 @@ export default function NovaReclamacao() {
       });
 
       // Apps Script (sem headers p/ evitar preflight CORS)
-      const res = await fetch(import.meta.env.VITE_APPSCRIPT_URL, {
+      const res = await fetch(APPSCRIPT_ENDPOINT, {
         method: "POST",
         body: formData,
       });
@@ -238,6 +248,13 @@ export default function NovaReclamacao() {
           </div>
         </div>
 
+        {missingGasEndpoint && (
+          <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Configure a variável <code className="font-mono">VITE_APPSCRIPT_URL</code> no ambiente (ex.: Netlify) com a URL do Apps
+            Script publicada em <code>/exec</code> antes de disponibilizar o formulário ao público.
+          </div>
+        )}
+
         {/* Stepper + barra de progresso (visual compatível) */}
         <div className="bg-white rounded-xl shadow mb-6">
           <div className="px-6 pt-6">
@@ -296,7 +313,7 @@ export default function NovaReclamacao() {
                 ) : (
                   <button
                     type="submit"
-                    disabled={sending}
+                    disabled={sending || missingGasEndpoint}
                     className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50"
                   >
                     {sending ? "Enviando..." : "Enviar reclamação"} <Upload className="w-4 h-4" />
