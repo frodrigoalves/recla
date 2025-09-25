@@ -1,6 +1,9 @@
 node_modules
 dist
 .env
+ codex/2025-09-25-su2dii
 # diretórios gerados automaticamente pela Netlify
 .netlify/
 .netlify
+.netlify/
+ main
