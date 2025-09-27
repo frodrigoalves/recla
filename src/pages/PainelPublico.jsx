@@ -1,19 +1,33 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
+
+const SHEET_GVIZ_URL = (import.meta.env.VITE_SHEET_GVIZ || "").trim();
 
 export default function PainelPublico() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(import.meta.env.VITE_SHEET_GVIZ)
+    if (!SHEET_GVIZ_URL) {
+      setError(
+        "Configuração ausente: defina a variável VITE_SHEET_GVIZ com o endpoint público da planilha de reclamações para carregar os dados."
+      );
+      setLoading(false);
+      return;
+    }
+
+    fetch(SHEET_GVIZ_URL)
       .then((res) => res.text())
       .then((t) => {
         const json = JSON.parse(t.substring(47, t.length - 2));
         const R = json.table.rows.map((r) => r.c.map((c) => (c ? c.v : "")));
         setRows(R);
       })
-      .catch(() => setRows([]))
+      .catch(() => {
+        setRows([]);
+        setError("Não foi possível carregar os dados públicos da planilha.");
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -39,6 +53,12 @@ export default function PainelPublico() {
         <h1 className="text-4xl font-bold text-gray-800"> Reclamações Públicas</h1>
         <p className="text-gray-500">Acompanhe as ocorrências registradas em tempo real</p>
       </header>
+
+      {error && (
+        <div className="mx-auto max-w-3xl rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {error}
+        </div>
+      )}
 
       {/* Cards de Resumo */}
       <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
@@ -77,7 +97,9 @@ export default function PainelPublico() {
         {loading ? (
           <div className="p-8 text-center text-gray-500 animate-pulse">Carregando registros...</div>
         ) : rows.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">Nenhum registro encontrado.</div>
+          <div className="p-8 text-center text-gray-500">
+            {error ? "Nenhum dado disponível no momento." : "Nenhum registro encontrado."}
+          </div>
         ) : (
           <table className="min-w-full text-sm">
             <thead className="bg-blue-600 text-white text-left">
@@ -101,7 +123,9 @@ export default function PainelPublico() {
                   <td className="px-6 py-4 text-gray-700">{r[3]}</td>
                   <td className="px-6 py-4 text-gray-700">{r[4]}</td>
                   <td className="px-6 py-4 text-gray-600">{r[5]}</td>
-                  <td className="px-6 py-4 max-w-xs truncate text-gray-600" title={r[9]}>{r[9]}</td>
+                  <td className="px-6 py-4 max-w-xs truncate text-gray-600" title={r[9]}>
+                    {r[9]}
+                  </td>
                   <td className="px-6 py-4">{renderStatus(r[11])}</td>
                 </tr>
               ))}

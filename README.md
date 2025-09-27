@@ -1,12 +1,43 @@
-# React + Vite
+# Reclamações TopBus
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicação em React + Vite para abertura de reclamações e consulta pública dos registros sincronizados com Google Apps Script e Google Sheets.
 
-Currently, two official plugins are available:
+## Requisitos de ambiente
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Crie um arquivo `.env` (ou configure as variáveis no provedor de deploy) com:
 
-## Expanding the ESLint configuration
+- `VITE_APPSCRIPT_URL`: endpoint do Web App publicado (URL que termina com `/exec`). Sem esse valor o formulário alerta o operador e bloqueia o envio.
+- `VITE_SHEET_GVIZ`: URL pública da planilha (formato `gviz/tq`) usada no painel público.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Scripts
+
+| Comando          | Descrição                     |
+| ---------------- | ----------------------------- |
+| `npm install`    | Instala as dependências.      |
+| `npm run dev`    | Sobe o ambiente de desenvolvimento na porta padrão do Vite. |
+| `npm run build`  | Gera os artefatos de produção em `dist/`. |
+| `npm run preview`| Pré-visualiza o build localmente. |
+| `npm run lint`   | Executa o ESLint.             |
+
+## Deploy na Netlify
+
+- **Build command**: `npm run build`
+- **Publish directory**: `dist`
+- Configure as variáveis `VITE_APPSCRIPT_URL` e `VITE_SHEET_GVIZ` em *Site settings → Build & deploy → Environment*.
+- Caso o site esteja preso em um build antigo, use a opção **Clear cache and deploy site** para forçar uma nova publicação.
+
+A configuração também está declarada em [`netlify.toml`](netlify.toml), garantindo o diretório correto mesmo em builds locais.
+
+## Integrações
+
+Os envios do formulário são encaminhados para o Apps Script (`doPost`) que salva as evidências no Google Drive (pastas diárias) e grava os dados em planilhas distintas para Reclamações e FTG. O painel público consome a planilha através do endpoint `gviz` informado em `VITE_SHEET_GVIZ`.
+
+## Testes
+
+Antes de abrir um PR, execute:
+
+```bash
+npm run lint
+```
+
+O projeto usa apenas ESLint neste momento.
