@@ -112,6 +112,7 @@ export default function NovaReclamacao() {
     if (!form.data_hora_ocorrencia) e.data_hora_ocorrencia = "Informe data e hora.";
     if (!form.linha) e.linha = "Selecione a linha.";
     if (!form.local_ocorrencia) e.local_ocorrencia = "Informe o local.";
+    if (!form.tipo_onibus) e.tipo_onibus = "Selecione o tipo de ônibus.";
     if (!form.descricao || form.descricao.trim().length < 20) {
       e.descricao = "Descreva a ocorrência com pelo menos 20 caracteres.";
     }
@@ -311,7 +312,7 @@ export default function NovaReclamacao() {
                     </div>
                   </Field>
 
-                  <Field label="Tipo de ônibus" hint="Opcional">
+                  <Field label="Tipo de ônibus" error={errors.tipo_onibus}>
                     <select
                       value={form.tipo_onibus}
                       onChange={(event) => update("tipo_onibus", event.target.value)}
