@@ -312,12 +312,16 @@ export default function NovaReclamacao() {
                   </Field>
 
                   <Field label="Tipo de ônibus" hint="Opcional">
-                    <input
+                    <select
                       value={form.tipo_onibus}
                       onChange={(event) => update("tipo_onibus", event.target.value)}
-                      placeholder="Convencional, articulado, etc."
                       className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    />
+                    >
+                      <option value="">Selecione...</option>
+                      <option value="Padron">Padron</option>
+                      <option value="Convencional">Convencional</option>
+                      <option value="Articulado">Articulado</option>
+                    </select>
                   </Field>
                 </div>
               </section>
@@ -347,41 +351,6 @@ export default function NovaReclamacao() {
 
               <section className="space-y-6">
                 <h2 className="text-base font-semibold text-slate-800">Contato (opcional)</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <Field label="Nome completo" error={errors.nome_completo}>
-                    <input
-                      value={form.nome_completo}
-                      onChange={(event) => update("nome_completo", event.target.value)}
-                      placeholder="Seu nome"
-                      className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                    />
-                  </Field>
-
-                  <Field label="E-mail">
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <input
-                        type="email"
-                        value={form.email}
-                        onChange={(event) => update("email", event.target.value)}
-                        placeholder="seuemail@dominio.com"
-                        className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      />
-                    </div>
-                  </Field>
-
-                  <Field label="Telefone" error={errors.contato && !form.email ? errors.contato : undefined}>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <input
-                        value={form.telefone}
-                        onChange={(event) => update("telefone", event.target.value)}
-                        placeholder="(31) 9 9999-9999"
-                        className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                      />
-                    </div>
-                  </Field>
-                </div>
 
                 <label className="flex items-start gap-3 p-4 rounded-lg border bg-gray-50">
                   <input
@@ -394,6 +363,50 @@ export default function NovaReclamacao() {
                     Desejo receber um retorno sobre esta reclamação.
                   </span>
                 </label>
+
+                {form.quer_retorno && (
+                  <>
+                    <p className="text-sm text-gray-700">
+                      Se quiser acompanhar o andamento, preencha os dados abaixo para receber o status atualizado da sua reclamação.
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <Field label="Nome completo" error={errors.nome_completo}>
+                        <input
+                          value={form.nome_completo}
+                          onChange={(event) => update("nome_completo", event.target.value)}
+                          placeholder="Seu nome"
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        />
+                      </Field>
+
+                      <Field label="E-mail">
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                          <input
+                            type="email"
+                            value={form.email}
+                            onChange={(event) => update("email", event.target.value)}
+                            placeholder="seuemail@dominio.com"
+                            className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                          />
+                        </div>
+                      </Field>
+
+                      <Field label="Telefone" error={errors.contato && !form.email ? errors.contato : undefined}>
+                        <div className="relative">
+                          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                          <input
+                            value={form.telefone}
+                            onChange={(event) => update("telefone", event.target.value)}
+                            placeholder="(31) 9 9999-9999"
+                            className="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                          />
+                        </div>
+                      </Field>
+                    </div>
+                  </>
+                )}
 
                 <div>
                   <label
