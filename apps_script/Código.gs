@@ -11,7 +11,7 @@
 const SHEET_ID        = '1N-T6z_FH2EizaW3WOE6Pnr7tpASiIMTaHewc1N2ozTI'; // ← ID da sua planilha
 const SHEET_NAME      = 'Publico';                                       // ← nome da aba
 const PROTO_PREFIX    = 'TOP-';                                          // prefixo do protocolo
-const DRIVE_FOLDER_ID = '1zXBybZ8dpLE1HmRpw0C_x3FjdVjjNUC4';             // ← pasta raiz no Drive
+const DRIVE_FOLDER_ID = '1mvmwJWuHERKHmkZ-eh8ez7Xm7_WPigRZ';             // ← pasta raiz no Drive
 const MB15            = 15 * 1024 * 1024;                                // 15 MB
 
 /** ====== SCHEMA FINAL (alinhado à planilha) ====== **/
@@ -39,9 +39,14 @@ const COLS = [
 
 /** ====== ENDPOINTS ====== **/
 function doGet() {
-  return ContentService
-    .createTextOutput(JSON.stringify({ ok: true, service: 'reclamacoes', sheet: SHEET_NAME }))
-    .setMimeType(ContentService.MimeType.JSON);
+  return _json_({
+    ok: true,
+    service: 'reclamacoes',
+    sheets: {
+      reclamacoes: SHEET_ID,
+      aba: SHEET_NAME
+    }
+  });
 }
 
 function doPost(e) {
@@ -141,7 +146,17 @@ function doPost(e) {
       return _json_({ ok: false, code: 'EMPTY_BODY', error: 'Body ausente' });
     }
 
-    // ===== Grava na ordem EXATA do COLS =====
+    if (payload.quer_retorno) {
+      const hasContato = payload.nome_completo && (payload.email || payload.telefone);
+      if (!hasContato) {
+        return _json_({ ok: false, code: 'INVALID_CONTACT', error: 'Contato/LGPD inválido' });
+      }
+    }
+
+    if (!payload.lgpd_aceite) {
+      return _json_({ ok: false, code: 'INVALID_CONTACT', error: 'Contato/LGPD inválido' });
+    }
+
     const sh = _sheet_();
     const row = [
       proto,                                  // protocolo
