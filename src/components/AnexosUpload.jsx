@@ -82,7 +82,7 @@ export default function AnexosUpload({ data, onChange }) {
       )}
 
       <p className="text-xs text-gray-500">
-        Somente arquivos de imagem, áudio ou vídeo enviados diretamente são aceitos; links ou textos não são anexados.
+        Somente arquivos de imagem, áudio ou vídeo com até 15&nbsp;MB são aceitos.
       </p>
     </div>
   );

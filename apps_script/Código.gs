@@ -26,7 +26,7 @@ const RECLAM_COLS = [
   'local_ocorrencia',
   'tipo_onibus',
   'descricao',
-  'anexos',        // URLs públicas separadas por espaço
+  'anexos',        // URLs públicas dos arquivos enviados (separadas por espaço)
   'status',        // default: "Pendente"
   'prazo_sla',
   'resolucao',
@@ -166,10 +166,8 @@ function handleReclamacaoMultipart_(e, now, ip) {
 
   const proto = RECLAM_PROTO_PREFIX + Date.now();
   const anexosUploads = uploadReclamacaoFiles_(e.files, proto, now);
-  const extraLinks = normalizeAnexosInput_(e?.parameter?.anexos);
-  const anexos = anexosUploads.concat(extraLinks);
 
-  return appendReclamacao_(payload, anexos, proto, now);
+  return appendReclamacao_(payload, anexosUploads, proto, now);
 }
 
 function handleReclamacaoJson_(payload, now, ip) {
@@ -180,8 +178,7 @@ function handleReclamacaoJson_(payload, now, ip) {
   }
 
   const proto = RECLAM_PROTO_PREFIX + Date.now();
-  const anexos = normalizeAnexosInput_(payload.anexos);
-  return appendReclamacao_(normalized, anexos, proto, now);
+  return appendReclamacao_(normalized, [], proto, now);
 }
 
 function buildReclamacaoPayload_(source, fallbackIp) {
@@ -284,39 +281,6 @@ function uploadReclamacaoFiles_(files, proto, now) {
   });
 
   return urls;
-}
-
-function normalizeAnexosInput_(input) {
-  if (!input) {
-    return [];
-  }
-
-  if (Array.isArray(input)) {
-    return input
-      .map(String)
-      .map((value) => value.trim())
-      .filter(Boolean);
-  }
-
-  if (typeof input === 'string') {
-    const trimmed = input.trim();
-    if (!trimmed) {
-      return [];
-    }
-
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (Array.isArray(parsed)) {
-        return normalizeAnexosInput_(parsed);
-      }
-    } catch (err) {
-      // segue fluxo
-    }
-
-    return [trimmed];
-  }
-
-  return [];
 }
 
 function getReclamSheet_() {
