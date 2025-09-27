@@ -201,6 +201,12 @@ export default function NovaReclamacao() {
         data = null;
       }
 
+      if (!data?.ok) {
+        const backendError = data?.error || "Erro ao enviar. Tente novamente.";
+        setResultMsg(backendError);
+        return;
+      }
+
       const protocolo =
         data?.protocolo ?? data?.Protocolo ?? data?.result?.protocolo ?? null;
       const protocoloFinal = protocolo || makeProtocolo();
