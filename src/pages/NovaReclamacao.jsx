@@ -339,7 +339,7 @@ export default function NovaReclamacao() {
 
                 <Field
                   label="Anexos (até 15 MB por arquivo)"
-                  hint="Envie fotos, áudios ou vídeos diretamente do seu dispositivo."
+                  hint="Envie fotos, áudios ou vídeos diretamente do seu dispositivo. Links públicos não são aceitos."
                 >
                   <AnexosUpload key={formKey} data={form} onChange={update} />
                 </Field>
