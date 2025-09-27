@@ -166,8 +166,10 @@ function handleReclamacaoMultipart_(e, now, ip) {
 
   const proto = RECLAM_PROTO_PREFIX + Date.now();
   const anexosUploads = uploadReclamacaoFiles_(e.files, proto, now);
+  const extraLinks = normalizeAnexosInput_(e?.parameter?.anexos);
+  const anexos = anexosUploads.concat(extraLinks);
 
-  return appendReclamacao_(payload, anexosUploads, proto, now);
+  return appendReclamacao_(payload, anexos, proto, now);
 }
 
 function handleReclamacaoJson_(payload, now, ip) {
@@ -177,8 +179,9 @@ function handleReclamacaoJson_(payload, now, ip) {
     return _json_({ ok: false, code: 'CONTACT_REQUIRED', error: contactError });
   }
 
+  const anexos = normalizeAnexosInput_(payload?.anexos);
   const proto = RECLAM_PROTO_PREFIX + Date.now();
-  return appendReclamacao_(normalized, [], proto, now);
+  return appendReclamacao_(normalized, anexos, proto, now);
 }
 
 function buildReclamacaoPayload_(source, fallbackIp) {
@@ -281,6 +284,38 @@ function uploadReclamacaoFiles_(files, proto, now) {
   });
 
   return urls;
+}
+
+function normalizeAnexosInput_(input) {
+  if (!input) {
+    return [];
+  }
+
+  if (Array.isArray(input)) {
+    return input
+      .map(function (value) { return String(value || '').trim(); })
+      .filter(function (value) { return value.length > 0; });
+  }
+
+  if (typeof input === 'string') {
+    var trimmed = input.trim();
+    if (!trimmed) {
+      return [];
+    }
+
+    try {
+      var parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return normalizeAnexosInput_(parsed);
+      }
+    } catch (err) {
+      // segue fluxo com o valor textual.
+    }
+
+    return [trimmed];
+  }
+
+  return [];
 }
 
 function getReclamSheet_() {
