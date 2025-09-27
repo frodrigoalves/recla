@@ -153,6 +153,7 @@ export default function NovaReclamacao() {
       }
 
       const payload = {
+        form: "reclamacoes",
         assunto: form.assunto,
         data_hora_ocorrencia: form.data_hora_ocorrencia,
         linha: form.linha,
@@ -169,26 +170,39 @@ export default function NovaReclamacao() {
         prazo_sla: prazo.toISOString(),
       };
 
-      const formData = new FormData();
-      Object.entries(payload).forEach(([key, value]) => {
-        if (value === undefined || value === null) return;
-        if (typeof value === "boolean") {
-          formData.append(key, value ? "true" : "false");
-        } else {
-          formData.append(key, String(value));
-        }
-      });
+      const hasUploads = (form.anexos || []).length > 0;
+      let response;
 
-      (form.anexos || []).forEach((file, index) => {
-        if (file) {
-          formData.append(`arquivo${index + 1}`, file);
-        }
-      });
+      if (hasUploads) {
+        const formData = new FormData();
+        Object.entries(payload).forEach(([key, value]) => {
+          if (value === undefined || value === null) return;
+          if (typeof value === "boolean") {
+            formData.append(key, value ? "true" : "false");
+          } else {
+            formData.append(key, String(value));
+          }
+        });
 
-      const response = await fetch(APPSCRIPT_ENDPOINT, {
-        method: "POST",
-        body: formData,
-      });
+        (form.anexos || []).forEach((file, index) => {
+          if (file) {
+            formData.append(`arquivo${index + 1}`, file);
+          }
+        });
+
+        response = await fetch(APPSCRIPT_ENDPOINT, {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        response = await fetch(APPSCRIPT_ENDPOINT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
@@ -202,7 +216,14 @@ export default function NovaReclamacao() {
       }
 
       if (!data?.ok) {
-        const backendError = data?.error || "Erro ao enviar. Tente novamente.";
+        let backendError = data?.error || "Erro ao enviar. Tente novamente.";
+        if (data?.code === "INVALID_CONTACT") {
+          backendError = "Informe nome e um meio de contato para receber retorno.";
+        } else if (data?.code === "EMPTY_BODY") {
+          backendError = "Não recebemos os dados do formulário. Tente novamente.";
+        } else if (data?.code === "UPLOAD_ERROR") {
+          backendError = data?.error || "Erro ao processar os anexos.";
+        }
         setResultMsg(backendError);
         return;
       }

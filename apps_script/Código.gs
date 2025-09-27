@@ -11,7 +11,7 @@
 const SHEET_ID        = '1N-T6z_FH2EizaW3WOE6Pnr7tpASiIMTaHewc1N2ozTI'; // ← ID da sua planilha
 const SHEET_NAME      = 'Publico';                                       // ← nome da aba
 const PROTO_PREFIX    = 'TOP-';                                          // prefixo do protocolo
-const DRIVE_FOLDER_ID = '1mvmwJWuHERKHmkZ-eh8ez7Xm7_WPigRZ';             // ← pasta raiz no Drive
+const DRIVE_FOLDER_ID = '1zXBybZ8dpLE1HmRpw0C_x3FjdVjjNUC4';             // ← pasta raiz no Drive
 const MB15            = 15 * 1024 * 1024;                                // 15 MB
 
 /** ====== SCHEMA FINAL (alinhado à planilha) ====== **/
