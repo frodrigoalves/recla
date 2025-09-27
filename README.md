@@ -4,9 +4,15 @@ Aplicação em React + Vite para abertura de reclamações e consulta pública d
 
 ## Requisitos de ambiente
 
-Crie um arquivo `.env` (ou configure as variáveis no provedor de deploy) com:
+Copie o arquivo de exemplo e ajuste os valores conforme o ambiente:
 
-- `VITE_APPSCRIPT_URL`: endpoint do Web App publicado (URL que termina com `/exec`). Sem esse valor o formulário alerta o operador e bloqueia o envio.
+```bash
+cp .env.example .env
+```
+
+No arquivo `.env` (ou nas variáveis de ambiente do provedor de deploy) preencha:
+
+- `VITE_APPSCRIPT_URL`: endpoint do Web App publicado (URL que termina com `/exec`). Sem esse valor o formulário alerta o operador e bloqueia o envio. O endpoint vigente é `https://script.google.com/macros/s/AKfycbxS8G4J256urdZ8Eur9yQFTtfnL7nPP9sMMbg6pIeHEukkuCKlK7mdw9NJsYjZOGAFYTA/exec`.
 - `VITE_SHEET_GVIZ`: URL pública da planilha (formato `gviz/tq`) usada no painel público.
 
 ## Scripts
