@@ -3,7 +3,6 @@ import {
   AlertCircle,
   Bus,
   CalendarClock,
-  CheckCircle2,
   FileText,
   Image as ImageIcon,
   Loader2,
@@ -11,6 +10,7 @@ import {
   MapPin,
   Music,
   Phone,
+  ShieldCheck,
   Upload,
   User,
   Video,
@@ -29,43 +29,31 @@ import { Select, SelectOption } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { appsScriptUrl } from "@/config/appsScript";
-import { ASSUNTOS } from "@/features/reclamacao/constants";
+import { ASSUNTOS, LINHAS } from "@/features/reclamacao/constants";
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024;
 const FALLBACK_TIPOS = ["Padron", "Convencional", "Articulado"];
 
-const FALLBACK_LINHAS = [
-  {
-    value: "85 - EST.S.GABRIEL/CENTRO - VIA FLORESTA",
-    label: "85 - EST.S.GABRIEL/CENTRO - VIA FLORESTA",
-    vehicles: ["8501", "8502", "8503"],
-  },
-  {
-    value: "812 - ESTAÇÃO SÃO GABRIEL",
-    label: "812 - ESTAÇÃO SÃO GABRIEL",
-    vehicles: ["8121", "8122", "8123"],
-  },
-  {
-    value: "815 - ESTAÇÃO SÃO GABRIEL/CONJ. PAULO VI",
-    label: "815 - ESTAÇÃO SÃO GABRIEL/CONJ. PAULO VI",
-    vehicles: ["8151", "8152", "8153"],
-  },
-  {
-    value: "822 - ESTAÇÃO JOSÉ CÂNDIDO / VILA MARIA",
-    label: "822 - ESTAÇÃO JOSÉ CÂNDIDO / VILA MARIA",
-    vehicles: ["8221", "8222", "8223"],
-  },
-  {
-    value: "9204 - SANTA EFIGÊNIA/ESTORIL",
-    label: "9204 - SANTA EFIGÊNIA/ESTORIL",
-    vehicles: ["920401", "920402", "920403"],
-  },
-  {
-    value: "9250 - CAETANO FURQUIM/NOVA CINTRA",
-    label: "9250 - CAETANO FURQUIM/NOVA CINTRA",
-    vehicles: ["925001", "925002", "925003"],
-  },
-];
+const FALLBACK_VEHICLE_MAP = {
+  "85 - EST.S.GABRIEL/CENTRO - VIA FLORESTA": ["8501", "8502", "8503"],
+  "812 - ESTAÇÃO SÃO GABRIEL": ["8121", "8122", "8123"],
+  "815 - ESTAÇÃO SÃO GABRIEL/CONJ. PAULO VI": ["8151", "8152", "8153"],
+  "822 - ESTAÇÃO JOSÉ CÂNDIDO / VILA MARIA": ["8221", "8222", "8223", "1111"],
+  "5201 - DONA CLARA/BURITIS": ["2020"],
+  "5401 - SÃO LUIZ/DOM CABRAL": ["77777", "12345", "3030"],
+  "9105 - NOVA VISTA/SION": ["20202", "2", "124444", "3333", "123456"],
+  "9204 - SANTA EFIGÊNIA/ESTORIL": ["2020"],
+  "9208 - TAQUARIL/CONJ. SANTA MARIA": ["123", "1", "1234569888"],
+  "9211 - CAETANO FURQUIM/HAVAI": ["12345", "1234", "909090"],
+  "9214 - CAETANO FURQUIM/HAVAI - VIA ALTO HAVAI": ["123456", "588"],
+  "9250 - CAETANO FURQUIM/NOVA CINTRA": ["8878", "0", "666"],
+};
+
+const FALLBACK_LINHAS = LINHAS.map((linha) => ({
+  value: linha,
+  label: linha,
+  vehicles: (FALLBACK_VEHICLE_MAP[linha] || []).map(String),
+}));
 
 const INITIAL_FORM = {
   assunto: "",
@@ -174,7 +162,7 @@ export default function ReclamacaoForm() {
   const [ip, setIp] = useState("");
 
   const [catalogLoading, setCatalogLoading] = useState(false);
-  const [catalogError, setCatalogError] = useState(false);
+  const [assuntos, setAssuntos] = useState(ASSUNTOS);
   const [linhas, setLinhas] = useState(FALLBACK_LINHAS);
   const [tiposOnibus, setTiposOnibus] = useState(FALLBACK_TIPOS);
   const [vehiclesByLine, setVehiclesByLine] = useState(() => buildVehicleDictionary(FALLBACK_LINHAS));
@@ -205,7 +193,6 @@ export default function ReclamacaoForm() {
 
     async function loadCatalog() {
       setCatalogLoading(true);
-      setCatalogError(false);
 
       try {
         const response = await fetch(`${APPS_URL}?catalogo=1`, {
@@ -219,6 +206,11 @@ export default function ReclamacaoForm() {
         const data = await response.json();
         const linhasPayload = Array.isArray(data?.linhas) ? data.linhas : [];
         const externalVehicles = data?.veiculos && typeof data.veiculos === "object" ? data.veiculos : {};
+
+        const assuntosPayload = Array.isArray(data?.assuntos) ? data.assuntos : [];
+        if (assuntosPayload.length > 0) {
+          setAssuntos(assuntosPayload.map(String));
+        }
 
         if (linhasPayload.length > 0) {
           const mapped = linhasPayload
@@ -244,8 +236,7 @@ export default function ReclamacaoForm() {
         }
       } catch (error) {
         if (controller.signal.aborted) return;
-        console.error("Falha ao carregar catálogo", error);
-        setCatalogError(true);
+        console.warn("Falha ao carregar catálogo", error);
       } finally {
         if (!controller.signal.aborted) {
           setCatalogLoading(false);
@@ -299,12 +290,8 @@ export default function ReclamacaoForm() {
       nextErrors.descricao = "Descreva com pelo menos 20 caracteres.";
     }
 
-    if (!formData.nome_completo.trim()) nextErrors.nome_completo = "Informe seu nome completo.";
-
     const email = formData.email.trim();
-    if (!email) {
-      nextErrors.email = "Informe um e-mail válido.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       nextErrors.email = "Informe um e-mail válido.";
     }
 
@@ -375,12 +362,11 @@ export default function ReclamacaoForm() {
       }
 
       if (data.ok) {
-        const protocolo = data.protocolo || data?.result?.protocolo || "";
+        const protocolo = (data.protocolo || data?.result?.protocolo || "").toString();
         setFeedback({
           type: "success",
-          message: protocolo
-            ? `Reclamação registrada. Protocolo: ${protocolo}`
-            : "Reclamação registrada com sucesso.",
+          message: "Reclamação registrada com sucesso.",
+          protocolo: protocolo.trim(),
         });
         setFormData(INITIAL_FORM);
         setErrors({});
@@ -416,28 +402,37 @@ export default function ReclamacaoForm() {
         </div>
       ) : null}
 
-      {catalogError ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700" role="alert">
-          Não foi possível carregar o catálogo de linhas automaticamente. Usando opções padrão.
-        </div>
-      ) : null}
-
       {feedback ? (
         <div
-          className={`flex items-start gap-3 rounded-xl px-4 py-3 text-sm shadow-md ${
+          className={`rounded-2xl border-2 px-5 py-4 shadow-sm transition-all ${
             feedback.type === "success"
-              ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-              : "border border-red-200 bg-red-50 text-red-700"
+              ? "border-emerald-400 bg-emerald-50/80 text-emerald-800"
+              : "border-red-300 bg-red-50 text-red-700"
           }`}
           role="status"
           aria-live="polite"
         >
           {feedback.type === "success" ? (
-            <CheckCircle2 className="mt-0.5 h-5 w-5" />
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2 text-base font-semibold">
+                <ShieldCheck className="h-5 w-5" />
+                {feedback.message}
+              </div>
+              {feedback.protocolo ? (
+                <p className="text-2xl font-bold tracking-tight text-emerald-700 sm:text-3xl">
+                  Protocolo: <span className="font-black">{feedback.protocolo}</span>
+                </p>
+              ) : null}
+              <p className="text-sm text-emerald-700/80">
+                Guarde este número para consultar o andamento da reclamação.
+              </p>
+            </div>
           ) : (
-            <AlertCircle className="mt-0.5 h-5 w-5" />
+            <div className="flex items-start gap-2 text-sm">
+              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+              <span>{feedback.message}</span>
+            </div>
           )}
-          <span>{feedback.message}</span>
         </div>
       ) : null}
 
@@ -480,7 +475,7 @@ export default function ReclamacaoForm() {
                 placeholder="Selecione o assunto"
               >
                 <SelectOption value="">Selecione o assunto</SelectOption>
-                {ASSUNTOS.map((assunto) => (
+                {assuntos.map((assunto) => (
                   <SelectOption key={assunto} value={assunto}>
                     {assunto}
                   </SelectOption>
@@ -729,41 +724,33 @@ export default function ReclamacaoForm() {
               </span>
               Dados de contato
             </CardTitle>
-            <CardDescription>Informe seus dados para retorno e acompanhamento do protocolo.</CardDescription>
+            <CardDescription>Informe seus dados para retorno e acompanhamento do protocolo (opcional).</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="nome_completo" className="flex items-center gap-2">
                   <User className="h-4 w-4 text-blue-500" />
-                  Nome completo <span className="text-red-500">*</span>
+                  Nome completo (opcional)
                 </Label>
                 <Input
                   id="nome_completo"
                   name="nome_completo"
-                  aria-required="true"
                   placeholder="Seu nome completo"
                   value={formData.nome_completo}
                   onChange={handleFieldChange("nome_completo")}
                 />
-                {errors.nome_completo ? (
-                  <p className="flex items-center gap-2 text-sm text-red-600" role="alert">
-                    <AlertCircle className="h-4 w-4" />
-                    {errors.nome_completo}
-                  </p>
-                ) : null}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-blue-500" />
-                  E-mail <span className="text-red-500">*</span>
+                  E-mail (opcional)
                 </Label>
                 <Input
                   id="email"
                   name="email"
                   type="email"
-                  aria-required="true"
                   placeholder="seuemail@exemplo.com"
                   value={formData.email}
                   onChange={handleFieldChange("email")}

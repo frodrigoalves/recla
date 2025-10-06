@@ -36,8 +36,34 @@ const CATALOG = {
     'OUTROS'
   ],
 
-  linhas: [],
-  veiculosPorLinha: {}
+  linhas: [
+    '85 - EST.S.GABRIEL/CENTRO - VIA FLORESTA',
+    '812 - ESTAÇÃO SÃO GABRIEL',
+    '815 - ESTAÇÃO SÃO GABRIEL/CONJ. PAULO VI',
+    '822 - ESTAÇÃO JOSÉ CÂNDIDO / VILA MARIA',
+    '5201 - DONA CLARA/BURITIS',
+    '5401 - SÃO LUIZ/DOM CABRAL',
+    '9105 - NOVA VISTA/SION',
+    '9204 - SANTA EFIGÊNIA/ESTORIL',
+    '9208 - TAQUARIL/CONJ. SANTA MARIA',
+    '9211 - CAETANO FURQUIM/HAVAI',
+    '9214 - CAETANO FURQUIM/HAVAI - VIA ALTO HAVAI',
+    '9250 - CAETANO FURQUIM/NOVA CINTRA'
+  ],
+  veiculosPorLinha: {
+    '85 - EST.S.GABRIEL/CENTRO - VIA FLORESTA': ['8501', '8502', '8503'],
+    '812 - ESTAÇÃO SÃO GABRIEL': ['8121', '8122', '8123'],
+    '815 - ESTAÇÃO SÃO GABRIEL/CONJ. PAULO VI': ['8151', '8152', '8153'],
+    '822 - ESTAÇÃO JOSÉ CÂNDIDO / VILA MARIA': ['8221', '8222', '8223', '1111'],
+    '5201 - DONA CLARA/BURITIS': ['2020'],
+    '5401 - SÃO LUIZ/DOM CABRAL': ['77777', '12345', '3030'],
+    '9105 - NOVA VISTA/SION': ['20202', '2', '124444', '3333', '123456'],
+    '9204 - SANTA EFIGÊNIA/ESTORIL': ['2020'],
+    '9208 - TAQUARIL/CONJ. SANTA MARIA': ['123', '1', '1234569888'],
+    '9211 - CAETANO FURQUIM/HAVAI': ['12345', '1234', '909090'],
+    '9214 - CAETANO FURQUIM/HAVAI - VIA ALTO HAVAI': ['123456', '588'],
+    '9250 - CAETANO FURQUIM/NOVA CINTRA': ['8878', '0', '666']
+  }
 };
 
 /** ===== SCHEMA FINAL ===== **/
@@ -193,35 +219,58 @@ function doPost(e) {
     }
 
     // Valida contato
-    if (!payload.nome_completo || (!payload.email && !payload.telefone) || !payload.lgpd_aceite) {
-      return respondResult_({ ok: false, error: 'Contato/LGPD inválido' }, e);
+    if (!payload.lgpd_aceite) {
+      return respondResult_({ ok: false, error: 'LGPD obrigatório' }, e);
     }
+
+    payload.assunto = toSafeString_(payload.assunto);
+    payload.data_hora_ocorrencia = toSafeString_(payload.data_hora_ocorrencia);
+    payload.linha = toSafeString_(payload.linha);
+    payload.numero_veiculo = toSafeString_(payload.numero_veiculo);
+    payload.local_ocorrencia = toSafeString_(payload.local_ocorrencia);
+    payload.tipo_onibus = toSafeString_(payload.tipo_onibus);
+    payload.descricao = toSafeString_(payload.descricao);
 
     validatePayload_(payload);
 
     // Persistência
     const sh = SpreadsheetApp.openById(SHEET_ID_RECLAMACOES).getSheetByName(SHEET_NAME);
     ensureSchemaAndFormat_(sh);
+    const assunto = toSafeString_(payload.assunto);
+    const dataOcorrencia = toSafeString_(payload.data_hora_ocorrencia);
+    const linha = toSafeString_(payload.linha);
+    const numeroVeiculo = toSafeString_(payload.numero_veiculo);
+    const localOcorrencia = toSafeString_(payload.local_ocorrencia);
+    const tipoOnibus = toSafeString_(payload.tipo_onibus);
+    const descricao = toSafeString_(payload.descricao);
+    const prazoSla = toSafeString_(payload.prazo_sla);
+    const resolucao = toSafeString_(payload.resolucao);
+    const dataResolucao = toSafeString_(payload.data_resolucao);
+    const nomeRegistrado = toSafeString_(payload.nome_completo) || 'Não informado';
+    const emailRegistrado = toSafeString_(payload.email);
+    const telefoneRegistrado = toSafeString_(payload.telefone);
+    const ipRegistrado = toSafeString_(payload.ip) || ip;
+
     const row = [
       proto,
-      payload.assunto,
-      payload.data_hora_ocorrencia,
-      payload.linha,
-      payload.numero_veiculo,
-      payload.local_ocorrencia,
-      payload.tipo_onibus,
-      payload.descricao,
+      assunto,
+      dataOcorrencia,
+      linha,
+      numeroVeiculo,
+      localOcorrencia,
+      tipoOnibus,
+      descricao,
       (anexosURLs || []).map(String).join(' '),
       payload.status || 'Pendente',
-      payload.prazo_sla || '',
-      payload.resolucao || '',
-      payload.data_resolucao || '',
+      prazoSla,
+      resolucao,
+      dataResolucao,
       !!payload.quer_retorno,
-      payload.nome_completo,
-      payload.email,
-      payload.telefone,
+      nomeRegistrado,
+      emailRegistrado,
+      telefoneRegistrado,
       !!payload.lgpd_aceite,
-      payload.ip
+      ipRegistrado
     ];
 
     sh.appendRow(row);
@@ -288,6 +337,10 @@ function isAllowedMime_(mt) {
 }
 function sanitizeName_(name) { return (name || '').replace(/[^\w.-]+/g, '_'); }
 function fileLink_(file) { return 'https://drive.google.com/open?id=' + file.getId(); }
+
+function toSafeString_(value) {
+  return value === null || value === undefined ? '' : String(value).trim();
+}
 
 function getSafeFolder_(rootId, dateObj) {
   try { return getDailyFolder_(rootId, dateObj); }

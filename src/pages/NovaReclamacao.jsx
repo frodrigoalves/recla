@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertCircle, ShieldCheck } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import ReclamacaoForm from "@/components/formulario/ReclamacaoForm";
 import { useAppsHealth } from "@/features/reclamacao/hooks/useAppsHealth";
 import { appsScriptUrl } from "@/config/appsScript";
@@ -35,13 +35,6 @@ export default function NovaReclamacao() {
           <p className="text-sm text-slate-600 md:text-base">
             Registre reclamações sobre o transporte coletivo e acompanhe o protocolo retornado pelo Apps Script após o envio.
           </p>
-          <div className="mx-auto flex max-w-2xl items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left text-sm text-emerald-700">
-            <ShieldCheck className="mt-0.5 h-5 w-5" />
-            <span>
-              O formulário envia os dados diretamente ao Apps Script da TopBus. Assim que o serviço confirmar o registro,
-              exibiremos o protocolo oficial nesta página.
-            </span>
-          </div>
           {!APPS_URL ? (
             <div className="mx-auto flex max-w-2xl items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm text-amber-700" role="alert">
               <AlertCircle className="mt-0.5 h-5 w-5" />
