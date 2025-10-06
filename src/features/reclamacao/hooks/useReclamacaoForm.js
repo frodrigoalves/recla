@@ -43,12 +43,18 @@ export function useReclamacaoForm() {
       }
 
       if (targetStep === 3) {
-        if (form.quer_retorno) {
-          if (!form.nome_completo) nextErrors.nome_completo = "Informe seu nome.";
-          if (!form.email && !form.telefone) {
-            nextErrors.contato = "Informe e-mail ou telefone.";
-          }
+        if (!form.nome_completo) {
+          nextErrors.nome_completo = "Informe seu nome.";
         }
+
+        const hasEmail = Boolean(form.email?.trim());
+        const hasPhone = Boolean(form.telefone?.trim());
+
+        if (!hasEmail && !hasPhone) {
+          nextErrors.email = "Informe e-mail ou telefone.";
+          nextErrors.telefone = "Informe e-mail ou telefone.";
+        }
+
         if (!form.lgpd_aceite) nextErrors.lgpd_aceite = "É necessário aceitar a LGPD.";
       }
 

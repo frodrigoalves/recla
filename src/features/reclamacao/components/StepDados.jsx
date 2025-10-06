@@ -74,6 +74,15 @@ export function StepDados({ form, update, errors, assuntos, linhas }) {
           />
         </div>
       </Field>
+
+      <Field label="Tipo de ônibus">
+        <input
+          placeholder="Convencional, articulado, etc."
+          value={form.tipo_onibus}
+          onChange={(event) => update("tipo_onibus", event.target.value)}
+          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        />
+      </Field>
     </section>
   );
 }

@@ -4,12 +4,11 @@ import { Field } from "./Field";
 export function StepContato({ form, update, errors }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <div className="md:col-span-2">
+      <div className="md:col-span-2 space-y-1">
         <p className="text-sm font-semibold text-gray-800">
-          Deseja receber um retorno sobre o status da reclamação?
-          <span className="ml-2 text-xs font-semibold uppercase text-gray-500">Opcional</span>
+          Dados para contato e acompanhamento da reclamação
         </p>
-        {errors.contato ? <p className="mt-1 text-xs text-red-600">{errors.contato}</p> : null}
+        <p className="text-xs text-gray-600">Preencha pelo menos um meio de contato (e-mail ou telefone).</p>
       </div>
 
       <Field label="Nome completo" error={errors.nome_completo}>
@@ -34,7 +33,7 @@ export function StepContato({ form, update, errors }) {
         </div>
       </Field>
 
-      <Field label="Telefone" error={!errors.email && errors.contato}>
+      <Field label="Telefone" error={errors.telefone}>
         <div className="relative">
           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input

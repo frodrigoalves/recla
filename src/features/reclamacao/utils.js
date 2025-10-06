@@ -23,6 +23,7 @@ export function buildInitialForm() {
     linha: "",
     numero_veiculo: "",
     local_ocorrencia: "",
+    tipo_onibus: "",
     descricao: "",
     anexos: [],
     quer_retorno: false,
@@ -52,25 +53,36 @@ export function createSubmissionFormData(form, storedAttachments = [], originalA
     linha: form.linha,
     numero_veiculo: form.numero_veiculo,
     local_ocorrencia: form.local_ocorrencia,
+    tipo_onibus: form.tipo_onibus,
     descricao: form.descricao?.slice(0, MAX_DESCRICAO_LENGTH) ?? "",
     quer_retorno: form.quer_retorno,
-    nome_completo: form.nome_completo,
-    email: form.email,
-    telefone: form.telefone,
+    nome_completo: form.nome_completo?.trim() ?? "",
+    email: form.email?.trim() ?? "",
+    telefone: form.telefone?.trim() ?? "",
     lgpd_aceite: form.lgpd_aceite,
     status: form.status,
     prazo_sla: prazo.toISOString(),
   };
 
   if (Array.isArray(storedAttachments) && storedAttachments.length > 0) {
-    payload.anexos_registrados = JSON.stringify(
-      storedAttachments.map((item) => ({
-        id: item?.id,
-        nome: item?.name ?? item?.nome ?? "arquivo",
-        tipo: item?.mime_type ?? item?.mimeType ?? item?.type ?? "",
-        tamanho: item?.size ?? item?.tamanho ?? 0,
-      }))
-    );
+    const normalized = storedAttachments.map((item) => ({
+      id: item?.id ?? null,
+      nome: item?.name ?? item?.nome ?? "arquivo",
+      tipo: item?.mime_type ?? item?.mimeType ?? item?.type ?? "",
+      tamanho: item?.size ?? item?.tamanho ?? 0,
+    }));
+
+    if (normalized.length > 0) {
+      payload.anexos_registrados = JSON.stringify(normalized);
+
+      const references = normalized
+        .map((item) => item.id || item.nome)
+        .filter((value) => typeof value === "string" && value.length > 0);
+
+      if (references.length > 0) {
+        payload.anexos = JSON.stringify(references);
+      }
+    }
   }
 
   Object.entries(payload).forEach(([key, value]) => {
