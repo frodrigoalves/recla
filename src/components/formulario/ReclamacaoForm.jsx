@@ -201,7 +201,18 @@ export default function ReclamacaoForm() {
           throw new Error(`Catálogo indisponível (${response.status})`);
         }
 
-        const data = await response.json();
+        const payloadText = await response.text();
+        if (!payloadText) {
+          return;
+        }
+
+        let data;
+        try {
+          data = JSON.parse(payloadText);
+        } catch (parseError) {
+          console.warn("Falha ao interpretar catálogo", parseError, payloadText);
+          return;
+        }
         const externalVehicles = data?.veiculos && typeof data.veiculos === "object" ? data.veiculos : {};
 
         const assuntosPayload = Array.isArray(data?.assuntos) ? data.assuntos : [];
