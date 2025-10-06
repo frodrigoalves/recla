@@ -2,7 +2,6 @@ import { useCallback, useState } from "react";
 import { ASSUNTOS, LINHAS, MIN_DESCRICAO_LENGTH } from "../constants";
 import { buildInitialForm, createSubmissionFormData, sanitizeAttachments } from "../utils";
 import { uploadAttachments } from "../../../services/attachments";
-import { appsScriptUrl } from "@/config/appsScript";
 
 const SUCCESS_MESSAGE = "Reclamação registrada com sucesso!";
 const ERROR_MESSAGE = "Erro ao enviar. Tente novamente.";
@@ -115,12 +114,7 @@ export function useReclamacaoForm() {
       }
 
       const formData = createSubmissionFormData(form, anexosRegistrados, anexos);
-      if (!appsScriptUrl) {
-        setFeedback({ type: "error", message: "Serviço indisponível. Configure o Apps Script." });
-        return false;
-      }
-
-      const response = await fetch(appsScriptUrl, {
+      const response = await fetch(import.meta.env.VITE_APPSCRIPT_URL, {
         method: "POST",
         body: formData,
       });

@@ -26,16 +26,10 @@ Aplicação React construída com Vite para exibir, em tempo real, as manifesta�
 
 1. Copie o arquivo `.env.example` para `.env`.
 2. Preencha `VITE_SHEET_GVIZ` com a URL pública da planilha do Google Sheets que abastece o painel.
-3. Defina `VITE_APPSCRIPT_URL` com o endpoint publicado do Apps Script (por exemplo, `https://script.google.com/macros/s/COLOQUE_AQUI/exec`). Essa variável é utilizada pelo formulário React para enviar os dados via `multipart/form-data` diretamente para o Apps Script.
+3. Defina `VITE_APPSCRIPT_URL` com o endpoint publicado do Apps Script (por padrão usamos `https://script.google.com/macros/s/AKfycbyO8eANUbOacdY5Hizl0Iv5teGJG1bb8L7BKbcyl6tcXk4KQYFwdjFVefKQAULq7pHGXw/exec`). Essa variável é utilizada pelo formulário React para enviar os dados via `multipart/form-data` diretamente para o Apps Script.
 4. Não versione o arquivo `.env`; utilize apenas o `.env.example` como referência.
 
 Sem essas variáveis o painel público exibirá uma mensagem de erro e não carregará dados, e o formulário não conseguirá entregar novas reclamações.
-
-### Variáveis de ambiente na Netlify
-
-1. No painel da Netlify, acesse **Site settings → Environment variables** e defina `Key = VITE_APPSCRIPT_URL` com o valor do Apps Script publicado.
-2. Após atualizar a variável, realize um novo deploy. Se o cache persistir a URL antiga, utilize **Clear cache and deploy site** para garantir que o build receba a env correta.
-3. A Vite injeta `import.meta.env.VITE_APPSCRIPT_URL` em tempo de build. Portanto, qualquer alteração exige novo deploy para refletir no bundle final.
 
 ### Testes do Apps Script
 
@@ -44,9 +38,3 @@ Sem essas variáveis o painel público exibirá uma mensagem de erro e não carr
 3. Confirme que a reclamação criada aparece na aba **Publico** da planilha vinculada e que os anexos foram gravados na pasta do Google Drive configurada no Apps Script.
 
 > Observação: o protocolo só é exibido após a confirmação de sucesso enviada pelo Apps Script via `postMessage`.
-
-### Checklist de QA em produção
-
-- Abra o console do navegador e execute `import.meta.env.VITE_APPSCRIPT_URL`; a URL do Apps Script precisa aparecer.
-- Inspecione o elemento `<form>` do embed/publicação e confirme `action=https://script.google.com/.../exec` sem atributos `data-netlify` ou `netlify`.
-- Envie uma reclamação de teste e, na aba **Network**, verifique o `POST` direto para `script.google.com/.../exec` retornando `200`.

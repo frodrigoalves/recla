@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AlertCircle, CheckCircle2, Upload } from "lucide-react";
 import DadosBasicos from "./DadosBasicos";
 import DadosComplementares from "./DadosComplementares";
-import { appsScriptUrl } from "@/config/appsScript";
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 const GOOGLE_ALLOWED_ORIGINS = ["script.google.com", "googleusercontent.com"];
@@ -21,8 +20,6 @@ const INITIAL_STATE = {
   lgpd_aceite: false,
   quer_retorno: false,
 };
-
-const APPS_URL = appsScriptUrl;
 
 export default function ReclamacaoForm() {
   const [formData, setFormData] = useState(INITIAL_STATE);
@@ -168,18 +165,12 @@ export default function ReclamacaoForm() {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 rounded-2xl bg-white/70 p-4 shadow-md backdrop-blur">
-      {!APPS_URL ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700" role="status">
-          URL do serviço não configurada.
-        </div>
-      ) : null}
-
       <form
         ref={formRef}
         method="POST"
         encType="multipart/form-data"
         target="appsFrame"
-        action={APPS_URL || undefined}
+        action={import.meta.env.VITE_APPSCRIPT_URL}
         onSubmit={handleSubmit}
         className="space-y-6"
       >

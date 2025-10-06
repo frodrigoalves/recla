@@ -16,13 +16,8 @@ import {
   StepDescricao,
   Success,
 } from "@/features/reclamacao/components";
-import { useAppsHealth } from "@/features/reclamacao/hooks/useAppsHealth";
-import { appsScriptUrl } from "@/config/appsScript";
-
-const APPS_URL = appsScriptUrl;
 
 export default function NovaReclamacao() {
-  const { loading: healthLoading, ok: healthOk } = useAppsHealth();
   const {
     form,
     step,
@@ -40,18 +35,6 @@ export default function NovaReclamacao() {
   } = useReclamacaoForm();
 
   const progressPct = useMemo(() => (step >= 4 ? 100 : Math.min(100, step * 33.34)), [step]);
-
-  const healthLabel = healthLoading
-    ? "Verificando serviço..."
-    : healthOk
-      ? "Serviço ativo"
-      : "Serviço indisponível";
-
-  const healthStyles = healthLoading
-    ? "border-amber-200 bg-amber-50 text-amber-700"
-    : healthOk
-      ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-      : "border-red-200 bg-red-50 text-red-700";
 
   const onSubmit = async (event) => {
     event.preventDefault();
