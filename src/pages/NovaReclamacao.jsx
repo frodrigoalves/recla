@@ -38,8 +38,8 @@ export default function NovaReclamacao() {
           <div className="mx-auto flex max-w-2xl items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-left text-sm text-emerald-700">
             <ShieldCheck className="mt-0.5 h-5 w-5" />
             <span>
-              O formulário envia os dados diretamente ao Apps Script via <code className="font-mono text-xs">multipart/form-data</code>.
-              O protocolo aparecerá aqui somente quando a resposta for confirmada.
+              O formulário envia os dados diretamente ao Apps Script da TopBus. Assim que o serviço confirmar o registro,
+              exibiremos o protocolo oficial nesta página.
             </span>
           </div>
           {!APPS_URL ? (
