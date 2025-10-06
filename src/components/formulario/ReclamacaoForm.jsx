@@ -394,11 +394,7 @@ export default function ReclamacaoForm() {
 
   useEffect(() => {
     if (!feedback || !feedbackRef.current) return;
-    const el = feedbackRef.current;
-    window.requestAnimationFrame(() => {
-      el.focus({ preventScroll: true });
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
+    feedbackRef.current.focus({ preventScroll: true });
   }, [feedback]);
 
   return (
@@ -821,31 +817,34 @@ export default function ReclamacaoForm() {
             )}
           </Button>
         </div>
-        {feedback ? (
+      </form>
+
+      {feedback ? (
+        <div className="fixed inset-x-0 bottom-6 z-50 flex justify-center px-4">
           <div
             ref={feedbackRef}
             tabIndex={-1}
-            className={`mt-4 rounded-2xl border-2 px-5 py-4 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+            className={`max-w-xl rounded-2xl border-2 px-5 py-4 shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${
               feedback.type === "success"
-                ? "border-emerald-400 bg-emerald-50/80 text-emerald-800 focus:ring-emerald-500"
-                : "border-red-300 bg-red-50 text-red-700 focus:ring-red-500"
+                ? "border-emerald-400 bg-emerald-50/95 text-emerald-900 focus:ring-emerald-500"
+                : "border-red-300 bg-red-50/95 text-red-700 focus:ring-red-500"
             }`}
             role="status"
             aria-live="polite"
           >
             {feedback.type === "success" ? (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2 text-base font-semibold">
+              <div className="flex flex-col gap-3 text-center">
+                <div className="flex items-center justify-center gap-2 text-base font-semibold">
                   <ShieldCheck className="h-5 w-5" />
                   {feedback.message}
                 </div>
                 {feedback.protocolo ? (
-                  <p className="text-2xl font-bold tracking-tight text-emerald-700 sm:text-3xl">
-                    Protocolo: <span className="font-black">{feedback.protocolo}</span>
+                  <p className="text-3xl font-black tracking-tight text-emerald-700 sm:text-4xl">
+                    Protocolo: {feedback.protocolo}
                   </p>
                 ) : null}
                 <p className="text-sm text-emerald-700/80">
-                  Guarde este número para consultar o andamento da reclamação.
+                  Guarde este número para acompanhar o andamento da manifestação.
                 </p>
               </div>
             ) : (
@@ -855,8 +854,8 @@ export default function ReclamacaoForm() {
               </div>
             )}
           </div>
-        ) : null}
-      </form>
+        </div>
+      ) : null}
 
       <iframe ref={iframeRef} name="appsFrame" title="Apps Script" style={{ display: "none" }} aria-hidden="true" />
     </div>

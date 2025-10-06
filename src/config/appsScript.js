@@ -1,5 +1,5 @@
 const FALLBACK_APPS_URL =
-  "https://script.google.com/macros/s/AKfycbzDwFWYwuoxWEBXrRy-8lbTRoHesaobgAK7W1nQHgkYG0-we4SRJ0ZbE4_lvtNQ4Mnnxw/exec";
+  "https://script.google.com/macros/s/AKfycbyO8eANUbOacdY5Hizl0Iv5teGJG1bb8L7BKbcyl6tcXk4KQYFwdjFVefKQAULq7pHGXw/exec";
 
 const envUrl = import.meta.env.VITE_APPSCRIPT_URL;
 const APPS_URL = envUrl || FALLBACK_APPS_URL;

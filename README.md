@@ -26,7 +26,7 @@ Aplicação React construída com Vite para exibir, em tempo real, as manifesta�
 
 1. Copie o arquivo `.env.example` para `.env`.
 2. Preencha `VITE_SHEET_GVIZ` com a URL pública da planilha do Google Sheets que abastece o painel.
-3. Defina `VITE_APPSCRIPT_URL` com o endpoint publicado do Apps Script (por exemplo, `https://script.google.com/macros/s/AKfycbzDwFWYwuoxWEBXrRy-8lbTRoHesaobgAK7W1nQHgkYG0-we4SRJ0ZbE4_lvtNQ4Mnnxw/exec`). Essa variável é utilizada pelo formulário React para enviar os dados via `multipart/form-data` diretamente para o Apps Script.
+3. Defina `VITE_APPSCRIPT_URL` com o endpoint publicado do Apps Script (por exemplo, `https://script.google.com/macros/s/AKfycbyO8eANUbOacdY5Hizl0Iv5teGJG1bb8L7BKbcyl6tcXk4KQYFwdjFVefKQAULq7pHGXw/exec`). Essa variável é utilizada pelo formulário React para enviar os dados via `multipart/form-data` diretamente para o Apps Script.
 4. Não versione o arquivo `.env`; utilize apenas o `.env.example` como referência.
 
 Sem essas variáveis o painel público exibirá uma mensagem de erro e não carregará dados, e o formulário não conseguirá entregar novas reclamações.
