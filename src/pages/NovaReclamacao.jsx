@@ -49,9 +49,25 @@ export default function NovaReclamacao() {
           <p className="text-sm md:text-base text-slate-600 px-3">
             Registre sua reclamação sobre o transporte coletivo. Sua opinião é importante para melhorarmos nossos serviços.
           </p>
+          <div className="flex justify-center">
+            <span
+              className={`inline-flex items-center gap-2 rounded-full border px-4 py-1 text-xs font-medium ${healthStyles}`}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-current opacity-75 animate-ping" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-current" />
+              </span>
+              {healthLabel}
+            </span>
+          </div>
           <div className="bg-green-50 border border-green-200 rounded-lg p-3 mx-2 md:mx-0">
             <p className="text-green-700 text-xs md:text-sm">Preencha todas as etapas e guarde seu protocolo.</p>
           </div>
+          {!APPS_URL ? (
+            <div className="mx-2 md:mx-auto max-w-xl rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-700">
+              URL do serviço não configurada. Defina <code className="font-mono">VITE_APPSCRIPT_URL</code> antes de enviar o formulário.
+            </div>
+          ) : null}
         </div>
 
         <div className="bg-white rounded-xl shadow mb-6">
