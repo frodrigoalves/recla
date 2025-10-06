@@ -41,7 +41,7 @@ export function calculatePrazoSla(baseDate = new Date()) {
   return prazo;
 }
 
-export function createSubmissionFormData(form, storedAttachments = []) {
+export function createSubmissionFormData(form, storedAttachments = [], originalAttachments = []) {
   const formData = new FormData();
   const prazo = calculatePrazoSla();
 
@@ -85,6 +85,25 @@ export function createSubmissionFormData(form, storedAttachments = []) {
 
     formData.append(key, value);
   });
+
+  if (Array.isArray(originalAttachments) && originalAttachments.length > 0) {
+    originalAttachments.forEach((file, index) => {
+      if (!file) {
+        return;
+      }
+
+      const hasFileConstructor = typeof File !== "undefined";
+      const isFileInstance = hasFileConstructor && file instanceof File;
+      const isBlobInstance = typeof Blob !== "undefined" && file instanceof Blob;
+
+      if (!isFileInstance && !isBlobInstance) {
+        return;
+      }
+
+      const filename = file?.name ?? `arquivo${index + 1}`;
+      formData.append(`arquivo${index + 1}`, file, filename);
+    });
+  }
 
   return formData;
 }

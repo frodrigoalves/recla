@@ -107,7 +107,7 @@ export function useReclamacaoForm() {
         }
       }
 
-      const formData = createSubmissionFormData(form, anexosRegistrados);
+      const formData = createSubmissionFormData(form, anexosRegistrados, anexos);
       const response = await fetch(import.meta.env.VITE_APPSCRIPT_URL, {
         method: "POST",
         body: formData,
