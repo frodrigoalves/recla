@@ -161,27 +161,11 @@ function buildVehicleDictionary(linhas, externalVehicles = {}) {
   }, {});
 }
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result === "string") {
-        const [, base64] = result.split(",");
-        resolve(base64 ?? "");
-      } else {
-        resolve("");
-      }
-    };
-    reader.onerror = () => {
-      reject(reader.error || new Error("Erro ao ler arquivo"));
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
 export default function ReclamacaoForm() {
+  const formRef = useRef(null);
+  const iframeRef = useRef(null);
   const fileInputRef = useRef(null);
+  const submissionTimeoutRef = useRef(null);
 
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [feedback, setFeedback] = useState(null);
@@ -316,7 +300,14 @@ export default function ReclamacaoForm() {
     }
 
     if (!formData.nome_completo.trim()) nextErrors.nome_completo = "Informe seu nome completo.";
-    if (!formData.email.trim()) nextErrors.email = "Informe um e-mail válido.";
+
+    const email = formData.email.trim();
+    if (!email) {
+      nextErrors.email = "Informe um e-mail válido.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      nextErrors.email = "Informe um e-mail válido.";
+    }
+
     if (!formData.lgpd_aceite) nextErrors.lgpd_aceite = "Você precisa aceitar o tratamento de dados.";
 
     const files = fileInputRef.current?.files;
@@ -331,92 +322,89 @@ export default function ReclamacaoForm() {
     return nextErrors;
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
+  const handleSubmit = (event) => {
     const validationErrors = validateBeforeSubmit();
     if (Object.keys(validationErrors).length > 0) {
+      event.preventDefault();
       setFeedback({ type: "error", message: "Revise os campos destacados antes de enviar." });
       return;
     }
 
     if (!APPS_URL) {
+      event.preventDefault();
       setFeedback({ type: "error", message: "Serviço não configurado. Contate o suporte." });
       return;
     }
 
     setIsSubmitting(true);
     setFeedback(null);
-
-    try {
-      const files = fileInputRef.current?.files ? Array.from(fileInputRef.current.files) : [];
-      let anexos = [];
-
-      if (files.length > 0) {
-        anexos = await Promise.all(
-          files.map(async (file) => ({
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            content: await fileToBase64(file),
-          })),
-        );
-      }
-
-      const payload = {
-        ...formData,
-        quer_retorno: Boolean(formData.quer_retorno),
-        lgpd_aceite: Boolean(formData.lgpd_aceite),
-        ip,
-      };
-
-      if (anexos.length > 0) {
-        payload.anexos = anexos;
-      }
-
-      const response = await fetch(APPS_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Falha ao enviar (${response.status})`);
-      }
-
-      let data = null;
-      try {
-        data = await response.json();
-      } catch (error) {
-        console.warn("Resposta não estava em JSON", error);
-      }
-
-      const protocolo = data?.protocolo || data?.Protocolo || data?.result?.protocolo || "";
-
-      setFeedback({
-        type: "success",
-        message: protocolo
-          ? `✅ Reclamação registrada com sucesso. Protocolo: ${protocolo}`
-          : "✅ Reclamação registrada com sucesso.",
-      });
-
-      setFormData(INITIAL_FORM);
-      setErrors({});
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    } catch (error) {
-      console.error("Erro ao enviar reclamação", error);
-      setFeedback({
-        type: "error",
-        message: "Não foi possível enviar sua reclamação. Tente novamente em instantes.",
-      });
-    } finally {
-      setIsSubmitting(false);
+    if (submissionTimeoutRef.current) {
+      window.clearTimeout(submissionTimeoutRef.current);
     }
+    submissionTimeoutRef.current = window.setTimeout(() => {
+      setIsSubmitting(false);
+      setFeedback((prev) =>
+        prev || {
+          type: "error",
+          message: "Não recebemos confirmação do serviço. Verifique se a reclamação foi registrada antes de reenviar.",
+        },
+      );
+      submissionTimeoutRef.current = null;
+    }, 15000);
   };
+
+  useEffect(() => {
+    function handleIframeMessage(event) {
+      if (!iframeRef.current || event.source !== iframeRef.current.contentWindow) return;
+
+      let data = event.data;
+      if (typeof data === "string") {
+        try {
+          data = JSON.parse(data);
+        } catch {
+          return;
+        }
+      }
+
+      if (!data || typeof data !== "object" || !("ok" in data)) return;
+
+      setIsSubmitting(false);
+      if (submissionTimeoutRef.current) {
+        window.clearTimeout(submissionTimeoutRef.current);
+        submissionTimeoutRef.current = null;
+      }
+
+      if (data.ok) {
+        const protocolo = data.protocolo || data?.result?.protocolo || "";
+        setFeedback({
+          type: "success",
+          message: protocolo
+            ? `Reclamação registrada. Protocolo: ${protocolo}`
+            : "Reclamação registrada com sucesso.",
+        });
+        setFormData(INITIAL_FORM);
+        setErrors({});
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        if (formRef.current) {
+          formRef.current.reset();
+        }
+      } else {
+        const errorMessage = data.error || data.message || "Não foi possível enviar sua reclamação.";
+        setFeedback({ type: "error", message: errorMessage });
+      }
+    }
+
+    window.addEventListener("message", handleIframeMessage);
+    return () => {
+      window.removeEventListener("message", handleIframeMessage);
+      if (submissionTimeoutRef.current) {
+        window.clearTimeout(submissionTimeoutRef.current);
+        submissionTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   const linhaSelecionada = useMemo(() => linhas.find((linha) => linha.value === formData.linha), [linhas, formData.linha]);
 
@@ -453,8 +441,18 @@ export default function ReclamacaoForm() {
         </div>
       ) : null}
 
-      <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+      <form
+        ref={formRef}
+        action={APPS_URL || undefined}
+        method="POST"
+        encType="multipart/form-data"
+        target="appsFrame"
+        onSubmit={handleSubmit}
+        className="space-y-6"
+        noValidate
+      >
         <input type="hidden" name="ip" value={ip} readOnly />
+        <input type="hidden" name="iframe" value="true" />
 
         <Card>
           <CardHeader className="space-y-2">
@@ -476,7 +474,7 @@ export default function ReclamacaoForm() {
               <Select
                 id="assunto"
                 name="assunto"
-                required
+                aria-required="true"
                 value={formData.assunto}
                 onChange={handleFieldChange("assunto")}
                 placeholder="Selecione o assunto"
@@ -506,7 +504,7 @@ export default function ReclamacaoForm() {
                   id="data_hora_ocorrencia"
                   name="data_hora_ocorrencia"
                   type="datetime-local"
-                  required
+                  aria-required="true"
                   value={formData.data_hora_ocorrencia}
                   onChange={handleFieldChange("data_hora_ocorrencia")}
                 />
@@ -526,7 +524,7 @@ export default function ReclamacaoForm() {
                 <Select
                   id="linha"
                   name="linha"
-                  required
+                  aria-required="true"
                   value={formData.linha}
                   onChange={handleFieldChange("linha")}
                   placeholder={catalogLoading ? "Carregando linhas..." : "Selecione a linha"}
@@ -560,7 +558,7 @@ export default function ReclamacaoForm() {
                   <Select
                     id="numero_veiculo"
                     name="numero_veiculo"
-                    required
+                    aria-required="true"
                     value={formData.numero_veiculo}
                     onChange={handleFieldChange("numero_veiculo")}
                     placeholder="Selecione o número do carro"
@@ -577,7 +575,7 @@ export default function ReclamacaoForm() {
                   <Input
                     id="numero_veiculo"
                     name="numero_veiculo"
-                    required
+                    aria-required="true"
                     value={formData.numero_veiculo}
                     onChange={handleFieldChange("numero_veiculo")}
                     placeholder={formData.linha ? "Informe o número do veículo" : "Selecione a linha primeiro"}
@@ -601,7 +599,7 @@ export default function ReclamacaoForm() {
                 <Select
                   id="tipo_onibus"
                   name="tipo_onibus"
-                  required
+                  aria-required="true"
                   value={formData.tipo_onibus}
                   onChange={handleFieldChange("tipo_onibus")}
                   placeholder="Selecione o tipo de ônibus"
@@ -629,7 +627,7 @@ export default function ReclamacaoForm() {
                 <Input
                   id="local_ocorrencia"
                   name="local_ocorrencia"
-                  required
+                  aria-required="true"
                   placeholder="Rua, ponto ou região"
                   value={formData.local_ocorrencia}
                   onChange={handleFieldChange("local_ocorrencia")}
@@ -661,15 +659,15 @@ export default function ReclamacaoForm() {
                 <FileText className="h-4 w-4 text-blue-500" />
                 Detalhe o que aconteceu <span className="text-red-500">*</span>
               </Label>
-              <Textarea
-                id="descricao"
-                name="descricao"
-                minLength={20}
-                required
-                value={formData.descricao}
-                onChange={handleFieldChange("descricao")}
-                placeholder="Descreva a situação, horários, pessoas envolvidas e outros detalhes importantes."
-              />
+                <Textarea
+                  id="descricao"
+                  name="descricao"
+                  minLength={20}
+                  aria-required="true"
+                  value={formData.descricao}
+                  onChange={handleFieldChange("descricao")}
+                  placeholder="Descreva a situação, horários, pessoas envolvidas e outros detalhes importantes."
+                />
               <div className="flex items-center justify-between text-xs text-slate-500">
                 <span>Mínimo de 20 caracteres.</span>
                 <span>{Math.max(0, 1000 - formData.descricao.length)} caracteres restantes</span>
@@ -743,7 +741,7 @@ export default function ReclamacaoForm() {
                 <Input
                   id="nome_completo"
                   name="nome_completo"
-                  required
+                  aria-required="true"
                   placeholder="Seu nome completo"
                   value={formData.nome_completo}
                   onChange={handleFieldChange("nome_completo")}
@@ -765,7 +763,7 @@ export default function ReclamacaoForm() {
                   id="email"
                   name="email"
                   type="email"
-                  required
+                  aria-required="true"
                   placeholder="seuemail@exemplo.com"
                   value={formData.email}
                   onChange={handleFieldChange("email")}
@@ -847,23 +845,25 @@ export default function ReclamacaoForm() {
           </CardContent>
         </Card>
 
-        <div className="space-y-3">
-          <Button type="submit" disabled={isSubmitting || !APPS_URL} className="w-full">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-slate-500">
+            Ao enviar, você autoriza o tratamento dos dados conforme a Política de Privacidade da TopBus.
+          </p>
+          <Button type="submit" className="h-12 px-8" disabled={isSubmitting || !APPS_URL}>
             {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Enviando reclamação...
-              </>
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" /> Enviando...
+              </span>
             ) : (
-              <>
-                Enviar reclamação <Upload className="h-4 w-4" />
-              </>
+              <span className="flex items-center gap-2">
+                <Upload className="h-4 w-4" /> Enviar reclamação
+              </span>
             )}
           </Button>
-          <p className="text-center text-xs text-slate-500">
-            Ao enviar, você concorda em compartilhar as informações para registro oficial da ocorrência.
-          </p>
         </div>
       </form>
+
+      <iframe ref={iframeRef} name="appsFrame" title="Apps Script" style={{ display: "none" }} aria-hidden="true" />
     </div>
   );
 }
