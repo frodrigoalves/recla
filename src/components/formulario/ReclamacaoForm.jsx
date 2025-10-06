@@ -154,6 +154,7 @@ export default function ReclamacaoForm() {
   const iframeRef = useRef(null);
   const fileInputRef = useRef(null);
   const submissionTimeoutRef = useRef(null);
+  const feedbackRef = useRef(null);
 
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [feedback, setFeedback] = useState(null);
@@ -161,9 +162,8 @@ export default function ReclamacaoForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [ip, setIp] = useState("");
 
-  const [catalogLoading, setCatalogLoading] = useState(false);
   const [assuntos, setAssuntos] = useState(ASSUNTOS);
-  const [linhas, setLinhas] = useState(FALLBACK_LINHAS);
+  const linhas = FALLBACK_LINHAS;
   const [tiposOnibus, setTiposOnibus] = useState(FALLBACK_TIPOS);
   const [vehiclesByLine, setVehiclesByLine] = useState(() => buildVehicleDictionary(FALLBACK_LINHAS));
 
@@ -192,8 +192,6 @@ export default function ReclamacaoForm() {
     const controller = new AbortController();
 
     async function loadCatalog() {
-      setCatalogLoading(true);
-
       try {
         const response = await fetch(`${APPS_URL}?catalogo=1`, {
           signal: controller.signal,
@@ -204,7 +202,6 @@ export default function ReclamacaoForm() {
         }
 
         const data = await response.json();
-        const linhasPayload = Array.isArray(data?.linhas) ? data.linhas : [];
         const externalVehicles = data?.veiculos && typeof data.veiculos === "object" ? data.veiculos : {};
 
         const assuntosPayload = Array.isArray(data?.assuntos) ? data.assuntos : [];
@@ -212,14 +209,16 @@ export default function ReclamacaoForm() {
           setAssuntos(assuntosPayload.map(String));
         }
 
+        const linhasPayload = Array.isArray(data?.linhas) ? data.linhas : [];
         if (linhasPayload.length > 0) {
           const mapped = linhasPayload
             .map((linha) => mapLine(linha, externalVehicles))
             .filter((linha) => linha && linha.value && linha.label);
-
           if (mapped.length > 0) {
-            setLinhas(mapped);
-            setVehiclesByLine(buildVehicleDictionary(mapped, externalVehicles));
+            setVehiclesByLine((prev) => ({
+              ...prev,
+              ...buildVehicleDictionary(mapped, externalVehicles),
+            }));
           }
         }
 
@@ -237,10 +236,6 @@ export default function ReclamacaoForm() {
       } catch (error) {
         if (controller.signal.aborted) return;
         console.warn("Falha ao carregar catálogo", error);
-      } finally {
-        if (!controller.signal.aborted) {
-          setCatalogLoading(false);
-        }
       }
     }
 
@@ -392,47 +387,25 @@ export default function ReclamacaoForm() {
     };
   }, []);
 
-  const linhaSelecionada = useMemo(() => linhas.find((linha) => linha.value === formData.linha), [linhas, formData.linha]);
+  const linhaSelecionada = useMemo(
+    () => linhas.find((linha) => linha.value === formData.linha),
+    [formData.linha, linhas],
+  );
+
+  useEffect(() => {
+    if (!feedback || !feedbackRef.current) return;
+    const el = feedbackRef.current;
+    window.requestAnimationFrame(() => {
+      el.focus({ preventScroll: true });
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }, [feedback]);
 
   return (
     <div className="space-y-6">
       {!APPS_URL ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700" role="status">
           Serviço não configurado. Contate o suporte.
-        </div>
-      ) : null}
-
-      {feedback ? (
-        <div
-          className={`rounded-2xl border-2 px-5 py-4 shadow-sm transition-all ${
-            feedback.type === "success"
-              ? "border-emerald-400 bg-emerald-50/80 text-emerald-800"
-              : "border-red-300 bg-red-50 text-red-700"
-          }`}
-          role="status"
-          aria-live="polite"
-        >
-          {feedback.type === "success" ? (
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2 text-base font-semibold">
-                <ShieldCheck className="h-5 w-5" />
-                {feedback.message}
-              </div>
-              {feedback.protocolo ? (
-                <p className="text-2xl font-bold tracking-tight text-emerald-700 sm:text-3xl">
-                  Protocolo: <span className="font-black">{feedback.protocolo}</span>
-                </p>
-              ) : null}
-              <p className="text-sm text-emerald-700/80">
-                Guarde este número para consultar o andamento da reclamação.
-              </p>
-            </div>
-          ) : (
-            <div className="flex items-start gap-2 text-sm">
-              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
-              <span>{feedback.message}</span>
-            </div>
-          )}
         </div>
       ) : null}
 
@@ -522,7 +495,7 @@ export default function ReclamacaoForm() {
                   aria-required="true"
                   value={formData.linha}
                   onChange={handleFieldChange("linha")}
-                  placeholder={catalogLoading ? "Carregando linhas..." : "Selecione a linha"}
+                  placeholder="Selecione a linha"
                 >
                   <SelectOption value="">Selecione a linha</SelectOption>
                   {linhas.map((linha) => (
@@ -848,6 +821,41 @@ export default function ReclamacaoForm() {
             )}
           </Button>
         </div>
+        {feedback ? (
+          <div
+            ref={feedbackRef}
+            tabIndex={-1}
+            className={`mt-4 rounded-2xl border-2 px-5 py-4 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              feedback.type === "success"
+                ? "border-emerald-400 bg-emerald-50/80 text-emerald-800 focus:ring-emerald-500"
+                : "border-red-300 bg-red-50 text-red-700 focus:ring-red-500"
+            }`}
+            role="status"
+            aria-live="polite"
+          >
+            {feedback.type === "success" ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 text-base font-semibold">
+                  <ShieldCheck className="h-5 w-5" />
+                  {feedback.message}
+                </div>
+                {feedback.protocolo ? (
+                  <p className="text-2xl font-bold tracking-tight text-emerald-700 sm:text-3xl">
+                    Protocolo: <span className="font-black">{feedback.protocolo}</span>
+                  </p>
+                ) : null}
+                <p className="text-sm text-emerald-700/80">
+                  Guarde este número para consultar o andamento da reclamação.
+                </p>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 text-sm">
+                <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0" />
+                <span>{feedback.message}</span>
+              </div>
+            )}
+          </div>
+        ) : null}
       </form>
 
       <iframe ref={iframeRef} name="appsFrame" title="Apps Script" style={{ display: "none" }} aria-hidden="true" />

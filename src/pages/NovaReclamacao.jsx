@@ -3,7 +3,6 @@ import { AlertCircle } from "lucide-react";
 import ReclamacaoForm from "@/components/formulario/ReclamacaoForm";
 import { useAppsHealth } from "@/features/reclamacao/hooks/useAppsHealth";
 import { appsScriptUrl } from "@/config/appsScript";
-import { Badge } from "@/components/ui/badge";
 
 const APPS_URL = appsScriptUrl;
 
@@ -16,24 +15,16 @@ export default function NovaReclamacao() {
       ? "Serviço ativo"
       : "Serviço indisponível";
 
-  const healthVariant = loading ? "warning" : ok ? "default" : "danger";
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-slate-50 py-6 px-4">
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         <header className="space-y-4 text-center">
-          <div className="flex justify-center">
-            <Badge variant={healthVariant} className="text-xs">
-              <span className="relative flex h-2 w-2 items-center justify-center">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-current opacity-75 animate-ping" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-current" />
-              </span>
-              {healthLabel}
-            </Badge>
-          </div>
           <h1 className="text-2xl font-bold text-slate-800">Formulário de Reclamação</h1>
           <p className="text-sm text-slate-600 md:text-base">
             Registre reclamações sobre o transporte coletivo e acompanhe o protocolo retornado pelo Apps Script após o envio.
+          </p>
+          <p className="text-xs font-medium text-slate-500" role="status" aria-live="polite">
+            {healthLabel}
           </p>
           {!APPS_URL ? (
             <div className="mx-auto flex max-w-2xl items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm text-amber-700" role="alert">
