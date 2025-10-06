@@ -1,121 +1,118 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useMemo } from "react";
 import { AlertTriangle, CheckCircle, Clock } from "lucide-react";
+import { useGoogleSheet } from "@/hooks/useGoogleSheet";
+import { StatusPill } from "@/components/StatusPill";
+
+const TABLE_COLUMNS = [
+  { key: "protocolo", label: "Protocolo" },
+  { key: "assunto", label: "Assunto" },
+  { key: "dataHora", label: "Data/Hora" },
+  { key: "linha", label: "Linha" },
+  { key: "veiculo", label: "Veículo" },
+  { key: "local", label: "Local" },
+  { key: "descricao", label: "Descrição" },
+  { key: "status", label: "Status" },
+];
+
+const SUMMARY_CONFIG = [
+  {
+    key: "total",
+    label: "Total",
+    icon: Clock,
+    accentClass: "text-gray-400",
+    valueClass: "text-2xl font-bold",
+  },
+  {
+    key: "pendentes",
+    label: "Pendentes",
+    icon: AlertTriangle,
+    accentClass: "text-red-500",
+    valueClass: "text-2xl font-bold text-red-600",
+  },
+  {
+    key: "analise",
+    label: "Em Análise",
+    icon: Clock,
+    accentClass: "text-yellow-500",
+    valueClass: "text-2xl font-bold text-yellow-600",
+  },
+  {
+    key: "resolvidas",
+    label: "Resolvidas",
+    icon: CheckCircle,
+    accentClass: "text-green-500",
+    valueClass: "text-2xl font-bold text-green-600",
+  },
+];
 
 export default function PainelPublico() {
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const sheetUrl = import.meta.env.VITE_SHEET_GVIZ;
+  const { rows, loading, error } = useGoogleSheet(sheetUrl);
 
-  useEffect(() => {
-    if (!sheetUrl) {
-      setError("URL da planilha não configurada.");
-      setLoading(false);
-      return;
-    }
-
-    fetch(sheetUrl)
-      .then((res) => res.text())
-      .then((t) => {
-        const json = JSON.parse(t.substring(47, t.length - 2));
-        const R = json.table.rows.map((r) => r.c.map((c) => (c ? c.v : "")));
-        setRows(R);
-      })
-      .catch(() => {
-        setRows([]);
-        setError("Não foi possível carregar os dados.");
-      })
-      .finally(() => setLoading(false));
-  }, [sheetUrl]);
-
-  const total = rows.length;
-  const pendentes = rows.filter((r) => !r[11] || r[11] === "Pendente").length;
-  const analise = rows.filter((r) => r[11] === "Em Análise").length;
-  const resolvidas = rows.filter((r) => r[11] === "Resolvido").length;
-
-  const renderStatus = (status) => {
-    if (status === "Resolvido") {
-      return <span className="px-3 py-1 rounded-full text-xs bg-green-100 text-green-700">Resolvido</span>;
-    }
-    if (status === "Em Análise") {
-      return <span className="px-3 py-1 rounded-full text-xs bg-yellow-100 text-yellow-700">Em Análise</span>;
-    }
-    return <span className="px-3 py-1 rounded-full text-xs bg-red-100 text-red-700">Pendente</span>;
-  };
+  const stats = useMemo(() => buildStats(rows), [rows]);
+  const tableRows = useMemo(() => rows.map(mapRowToDisplay), [rows]);
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-10">
-      {/* Cabeçalho */}
       <header className="text-center space-y-2">
-        <h1 className="text-4xl font-bold text-gray-800"> Reclamações Públicas</h1>
+        <h1 className="text-4xl font-bold text-gray-800">Reclamações Públicas</h1>
         <p className="text-gray-500">Acompanhe as ocorrências registradas em tempo real</p>
       </header>
 
-      {/* Cards de Resumo */}
       <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        <div className="p-5 bg-white shadow rounded-xl flex items-center gap-4 hover:shadow-lg transition">
-          <Clock className="text-gray-400 w-8 h-8" />
-          <div>
-            <p className="text-sm text-gray-500">Total</p>
-            <p className="text-2xl font-bold">{total}</p>
-          </div>
-        </div>
-        <div className="p-5 bg-white shadow rounded-xl flex items-center gap-4 hover:shadow-lg transition">
-          <AlertTriangle className="text-red-500 w-8 h-8" />
-          <div>
-            <p className="text-sm text-gray-500">Pendentes</p>
-            <p className="text-2xl font-bold text-red-600">{pendentes}</p>
-          </div>
-        </div>
-        <div className="p-5 bg-white shadow rounded-xl flex items-center gap-4 hover:shadow-lg transition">
-          <Clock className="text-yellow-500 w-8 h-8" />
-          <div>
-            <p className="text-sm text-gray-500">Em Análise</p>
-            <p className="text-2xl font-bold text-yellow-600">{analise}</p>
-          </div>
-        </div>
-        <div className="p-5 bg-white shadow rounded-xl flex items-center gap-4 hover:shadow-lg transition">
-          <CheckCircle className="text-green-500 w-8 h-8" />
-          <div>
-            <p className="text-sm text-gray-500">Resolvidas</p>
-            <p className="text-2xl font-bold text-green-600">{resolvidas}</p>
-          </div>
-        </div>
+        {SUMMARY_CONFIG.map(({ key, label, icon, accentClass, valueClass }) => {
+          const IconComponent = icon;
+          return (
+            <div
+              key={key}
+              className="p-5 bg-white shadow rounded-xl flex items-center gap-4 hover:shadow-lg transition"
+            >
+              <IconComponent className={`${accentClass} w-8 h-8`} />
+              <div>
+                <p className="text-sm text-gray-500">{label}</p>
+                <p className={valueClass}>{stats[key]}</p>
+              </div>
+            </div>
+          );
+        })}
       </section>
 
-      {/* Tabela */}
       <section className="overflow-x-auto bg-white shadow rounded-xl">
         {loading ? (
           <div className="p-8 text-center text-gray-500 animate-pulse">Carregando registros...</div>
         ) : error ? (
           <div className="p-8 text-center text-red-500">{error}</div>
-        ) : rows.length === 0 ? (
+        ) : tableRows.length === 0 ? (
           <div className="p-8 text-center text-gray-500">Nenhum registro encontrado.</div>
         ) : (
           <table className="min-w-full text-sm">
             <thead className="bg-blue-600 text-white text-left">
               <tr>
-                <th className="px-6 py-3">Protocolo</th>
-                <th className="px-6 py-3">Assunto</th>
-                <th className="px-6 py-3">Data/Hora</th>
-                <th className="px-6 py-3">Linha</th>
-                <th className="px-6 py-3">Veículo</th>
-                <th className="px-6 py-3">Local</th>
-                <th className="px-6 py-3">Descrição</th>
-                <th className="px-6 py-3">Status</th>
+                {TABLE_COLUMNS.map((column) => (
+                  <th key={column.key} className="px-6 py-3">
+                    {column.label}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {rows.map((r, i) => (
-                <tr key={i} className={`${i % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition`}>
-                  <td className="px-6 py-4 font-medium text-gray-800">{r[0]}</td>
-                  <td className="px-6 py-4 text-gray-700">{r[1]}</td>
-                  <td className="px-6 py-4 text-gray-600">{r[2]}</td>
-                  <td className="px-6 py-4 text-gray-700">{r[3]}</td>
-                  <td className="px-6 py-4 text-gray-700">{r[4]}</td>
-                  <td className="px-6 py-4 text-gray-600">{r[5]}</td>
-                  <td className="px-6 py-4 max-w-xs truncate text-gray-600" title={r[9]}>{r[9]}</td>
-                  <td className="px-6 py-4">{renderStatus(r[11])}</td>
+              {tableRows.map((row, index) => (
+                <tr
+                  key={row.id ?? index}
+                  className={`${index % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-blue-50 transition`}
+                >
+                  <td className="px-6 py-4 font-medium text-gray-800">{row.protocolo}</td>
+                  <td className="px-6 py-4 text-gray-700">{row.assunto}</td>
+                  <td className="px-6 py-4 text-gray-600">{row.dataHora}</td>
+                  <td className="px-6 py-4 text-gray-700">{row.linha}</td>
+                  <td className="px-6 py-4 text-gray-700">{row.veiculo}</td>
+                  <td className="px-6 py-4 text-gray-600">{row.local}</td>
+                  <td className="px-6 py-4 max-w-xs truncate text-gray-600" title={row.descricao}>
+                    {row.descricao}
+                  </td>
+                  <td className="px-6 py-4">
+                    <StatusPill status={row.status} />
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -124,4 +121,51 @@ export default function PainelPublico() {
       </section>
     </div>
   );
+}
+
+function buildStats(rows) {
+  const base = { total: rows.length, pendentes: 0, analise: 0, resolvidas: 0 };
+  rows.forEach((row) => {
+    const key = normalizeStatusKey(row.status);
+    if (key === "resolvido") {
+      base.resolvidas += 1;
+    } else if (key === "em analise") {
+      base.analise += 1;
+    } else {
+      base.pendentes += 1;
+    }
+  });
+  return base;
+}
+
+function mapRowToDisplay(row) {
+  return {
+    id: getValue(row, "id", "protocolo"),
+    protocolo: getValue(row, "protocolo"),
+    assunto: getValue(row, "assunto"),
+    dataHora: getValue(row, "data_hora", "datahora", "data"),
+    linha: getValue(row, "linha", "numero_da_linha"),
+    veiculo: getValue(row, "numero_veiculo", "numero_do_veiculo", "veiculo"),
+    local: getValue(row, "local_ocorrencia", "local"),
+    descricao: getValue(row, "descricao", "relato", "observacoes"),
+    status: getValue(row, "status", "situacao"),
+  };
+}
+
+function getValue(row, ...keys) {
+  for (const key of keys) {
+    if (key && row[key]) {
+      return row[key];
+    }
+  }
+  return "";
+}
+
+function normalizeStatusKey(status) {
+  return (status || "Pendente")
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 }
