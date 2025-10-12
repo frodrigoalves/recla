@@ -11,22 +11,55 @@ export default function AnexosUpload({ data, onChange }) {
     );
   };
 
+  const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB - sincronizado com Apps Script
+
   const isAllowedType = (file) => {
     const type = (file?.type || "").toLowerCase();
-    return type.startsWith("image/") || type.startsWith("audio/") || type.startsWith("video/");
+    return type.startsWith("image/") || 
+           type.startsWith("audio/") || 
+           type.startsWith("video/") ||
+           type.includes("pdf") ||
+           type.includes("msword") ||
+           type.includes("officedocument");
+  };
+
+  const validateFile = (file) => {
+    if (!isFile(file)) {
+      return "Arquivo inválido";
+    }
+    if (!isAllowedType(file)) {
+      return "Tipo de arquivo não permitido. Envie apenas imagens, áudios, vídeos ou documentos.";
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      return `Arquivo muito grande. Tamanho máximo permitido: ${MAX_FILE_SIZE / (1024 * 1024)}MB`;
+    }
+    return null;
   };
 
   const attachments = Array.isArray(data.anexos) ? data.anexos.filter(isFile) : [];
 
   const handleFiles = (e) => {
     const picked = Array.from(e.target.files || []);
-    const newFiles = picked.filter((file) => isFile(file) && isAllowedType(file));
-    if (newFiles.length === 0 && attachments.length === 0) {
-      e.target.value = "";
-      return;
+    const validFiles = [];
+    const errors = [];
+
+    for (const file of picked) {
+      const error = validateFile(file);
+      if (error) {
+        errors.push(`${file.name}: ${error}`);
+      } else {
+        validFiles.push(file);
+      }
     }
 
-    onChange("anexos", [...attachments, ...newFiles]);
+    if (errors.length > 0) {
+      alert("Erros nos arquivos selecionados:\n\n" + errors.join("\n"));
+    }
+
+    if (validFiles.length > 0) {
+      onChange("anexos", [...attachments, ...validFiles]);
+    }
+    
     e.target.value = "";
   };
 
@@ -38,10 +71,15 @@ export default function AnexosUpload({ data, onChange }) {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold text-gray-800">Anexos</h2>
+      <div className="text-sm text-gray-600 mb-2">
+        Tipos permitidos: imagens, áudios, vídeos e documentos (PDF, Word)
+        <br />
+        Tamanho máximo por arquivo: 15MB
+      </div>
       <input
         type="file"
         multiple
-        accept="image/*,audio/*,video/*"
+        accept="image/*,audio/*,video/*,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         onChange={handleFiles}
         className="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer"
       />

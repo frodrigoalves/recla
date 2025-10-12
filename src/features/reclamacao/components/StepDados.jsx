@@ -4,14 +4,6 @@ import { Field } from "./Field";
 export function StepDados({ form, update, errors, assuntos, linhas }) {
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <Field label="Protocolo">
-        <input
-          value={form.protocolo}
-          disabled
-          className="w-full rounded-lg border border-gray-300 px-3 py-2 bg-gray-100 text-gray-700"
-        />
-      </Field>
-
       <Field label="Assunto" error={errors.assunto}>
         <select
           value={form.assunto}

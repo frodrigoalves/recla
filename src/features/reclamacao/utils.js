@@ -17,7 +17,7 @@ export function makeProtocolo() {
 
 export function buildInitialForm() {
   return {
-    protocolo: makeProtocolo(),
+    protocolo: "",  // Será gerado apenas no envio
     assunto: "",
     data_hora_ocorrencia: "",
     linha: "",

@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { ASSUNTOS, LINHAS, MIN_DESCRICAO_LENGTH } from "../constants";
-import { buildInitialForm, createSubmissionFormData, sanitizeAttachments } from "../utils";
+import { buildInitialForm, createSubmissionFormData, sanitizeAttachments, makeProtocolo } from "../utils";
 import { uploadAttachments } from "../../../services/attachments";
 
 const SUCCESS_MESSAGE = "Reclamação registrada com sucesso!";
@@ -97,7 +97,9 @@ export function useReclamacaoForm() {
     setSending(true);
     setFeedback({ type: null, message: "" });
 
-    const currentProtocolo = form.protocolo;
+    // Gera o protocolo apenas no momento do envio
+    const currentProtocolo = makeProtocolo();
+    setForm(prev => ({ ...prev, protocolo: currentProtocolo }));
 
     try {
       const anexos = sanitizeAttachments(form.anexos);
