@@ -26,15 +26,34 @@ Aplicação React construída com Vite para exibir, em tempo real, as manifesta�
 
 1. Copie o arquivo `.env.example` para `.env`.
 2. Preencha `VITE_SHEET_GVIZ` com a URL pública da planilha do Google Sheets que abastece o painel.
-3. Defina `VITE_APPSCRIPT_URL` com o endpoint publicado do Apps Script (por padrão usamos `https://script.google.com/macros/s/AKfycbyO8eANUbOacdY5Hizl0Iv5teGJG1bb8L7BKbcyl6tcXk4KQYFwdjFVefKQAULq7pHGXw/exec`). Essa variável é utilizada pelo formulário React para enviar os dados via `multipart/form-data` diretamente para o Apps Script.
+3. Defina `VITE_APPSCRIPT_URL` com o endpoint publicado do Apps Script (versão 14.3 - Topbus123 by Rodrigo Alves: `https://script.google.com/macros/s/AKfycbwdFNyYGTT5F2J4uyfsiOV9DfBhkPYjFqiYVIQh9TJ73rgzO9ES8QFdb5lx7GM9siqDRA/exec`). Essa variável é utilizada pelo formulário React para enviar os dados via `multipart/form-data` diretamente para o Apps Script.
 4. Não versione o arquivo `.env`; utilize apenas o `.env.example` como referência.
 
 Sem essas variáveis o painel público exibirá uma mensagem de erro e não carregará dados, e o formulário não conseguirá entregar novas reclamações.
 
-### Testes do Apps Script
+### Testes do Apps Script v14.3
 
-1. Valide o endpoint com uma chamada `GET` rápida: `curl "${VITE_APPSCRIPT_URL}?health=1"`. O retorno deve ser um JSON com `ok: true`.
-2. Inicie o ambiente (`npm run dev`) e preencha o formulário, anexando ao menos um arquivo (até 15MB). O envio é feito através de um `<iframe>` oculto para contornar CORS; após a resposta do Apps Script, o protocolo é exibido na tela.
-3. Confirme que a reclamação criada aparece na aba **Publico** da planilha vinculada e que os anexos foram gravados na pasta do Google Drive configurada no Apps Script.
+A versão 14.3 do Apps Script (Topbus123) inclui melhorias significativas:
+
+#### Endpoints disponíveis
+
+- **Health Check**: `curl -L "${VITE_APPSCRIPT_URL}?health=1"` → retorna status online
+- **Catálogo**: `curl -L "${VITE_APPSCRIPT_URL}?catalogo=1"` → retorna tipos de ônibus e linhas
+- **Info**: `curl -L "${VITE_APPSCRIPT_URL}"` → retorna informações da versão e endpoints
+
+#### Recursos v14.3
+
+- ✅ **Pasta backup**: sistema failover automático para armazenamento no Drive
+- ✅ **Logs detalhados**: depuração aprimorada com timestamps
+- ✅ **Validação de MIME**: aceita imagens, áudio, vídeo, PDF e documentos Office
+- ✅ **Organização por data**: arquivos organizados automaticamente em pastas ano/mês/dia
+- ✅ **Headers automáticos**: cabeçalhos da planilha são verificados e criados automaticamente
+
+#### Testes recomendados
+
+1. **Health check**: `curl -L "${VITE_APPSCRIPT_URL}?health=1"` → deve retornar `{"ok":true,"service":"topbus","status":"online"}`
+2. **Formulário completo**: teste o envio com anexos via `npm run dev`
+3. **Verificação na planilha**: confirme que os dados aparecem na aba **Publico**
+4. **URLs no Drive**: verifique se as URLs dos arquivos estão na coluna **anexos**
 
 > Observação: o protocolo só é exibido após a confirmação de sucesso enviada pelo Apps Script via `postMessage`.
