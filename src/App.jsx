@@ -1,7 +1,6 @@
 ﻿import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./layouts/Layout";
 import NovaReclamacao from "./pages/NovaReclamacao";
-import PainelPublico from "./pages/PainelPublico";
 
 export default function App() {
   return (
@@ -10,7 +9,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/nova" />} />
           <Route path="/nova" element={<NovaReclamacao />} />
-          <Route path="/painel" element={<PainelPublico />} />
+          {/* Dashboard removido para acesso público apenas ao formulário */}
         </Routes>
       </Layout>
     </BrowserRouter>
