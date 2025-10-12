@@ -1,6 +1,6 @@
-# Painel Público de Reclamações
+# Formulário de Reclamações TopBus
 
-Aplicação React construída com Vite para exibir, em tempo real, as manifestações registradas em uma planilha do Google Sheets. O projeto foi adaptado para ser publicado na Netlify sem a necessidade de versionar artefatos gerados automaticamente (como `.netlify/plugins`).
+Aplicação React construída com Vite para registrar reclamações sobre o transporte coletivo. O formulário envia os dados diretamente para o Google Apps Script, que armazena as informações em planilha e os arquivos anexos no Google Drive. O projeto foi adaptado para ser publicado na Netlify sem a necessidade de versionar artefatos gerados automaticamente (como `.netlify/plugins`).
 
 ## Pré-requisitos
 
@@ -25,11 +25,18 @@ Aplicação React construída com Vite para exibir, em tempo real, as manifesta�
 ## Configuração do ambiente
 
 1. Copie o arquivo `.env.example` para `.env`.
-2. Preencha `VITE_SHEET_GVIZ` com a URL pública da planilha do Google Sheets que abastece o painel.
-3. Defina `VITE_APPSCRIPT_URL` com o endpoint publicado do Apps Script (versão 14.3 - Topbus123 by Rodrigo Alves: `https://script.google.com/macros/s/AKfycbwdFNyYGTT5F2J4uyfsiOV9DfBhkPYjFqiYVIQh9TJ73rgzO9ES8QFdb5lx7GM9siqDRA/exec`). Essa variável é utilizada pelo formulário React para enviar os dados via `multipart/form-data` diretamente para o Apps Script.
-4. Não versione o arquivo `.env`; utilize apenas o `.env.example` como referência.
+2. Defina `VITE_APPSCRIPT_URL` com o endpoint publicado do Apps Script (versão 14.3 - Topbus123 by Rodrigo Alves: `https://script.google.com/macros/s/AKfycbwdFNyYGTT5F2J4uyfsiOV9DfBhkPYjFqiYVIQh9TJ73rgzO9ES8QFdb5lx7GM9siqDRA/exec`). Essa variável é utilizada pelo formulário React para enviar os dados via `multipart/form-data` diretamente para o Apps Script.
+3. Não versione o arquivo `.env`; utilize apenas o `.env.example` como referência.
 
-Sem essas variáveis o painel público exibirá uma mensagem de erro e não carregará dados, e o formulário não conseguirá entregar novas reclamações.
+Sem essa variável o formulário não conseguirá entregar novas reclamações.
+
+## Características do Formulário
+
+- **Interface única**: Todos os campos em uma página, divididos em 3 seções numeradas
+- **Validação em tempo real**: Campos obrigatórios são validados antes do envio
+- **Upload de arquivos**: Suporte a imagens, áudio, vídeo, PDF e documentos Office (até 15MB cada)
+- **Protocolo automático**: Geração automática de protocolo para acompanhamento
+- **Responsivo**: Layout otimizado para desktop e mobile
 
 ### Testes do Apps Script v14.3
 
