@@ -25,10 +25,17 @@ Aplicação React construída com Vite para registrar reclamações sobre o tran
 ## Configuração do ambiente
 
 1. Copie o arquivo `.env.example` para `.env`.
-2. Defina `VITE_APPSCRIPT_URL` com o endpoint publicado do Apps Script (versão 14.3 - Topbus123 by Rodrigo Alves: `https://script.google.com/macros/s/AKfycbwdFNyYGTT5F2J4uyfsiOV9DfBhkPYjFqiYVIQh9TJ73rgzO9ES8QFdb5lx7GM9siqDRA/exec`). Essa variável é utilizada pelo formulário React para enviar os dados via `multipart/form-data` diretamente para o Apps Script.
+2. Defina a variável abaixo no seu `.env`:
+
+		```env
+		VITE_APPSCRIPT_URL=https://script.google.com/macros/s/AKfycbwdFNyYGTT5F2J4uyfsiOV9DfBhkPYjFqiYVIQh9TJ73rgzO9ES8QFdb5lx7GM9siqDRA/exec
+		```
+
+		Essa URL corresponde ao endpoint da versão 14.3 do Apps Script Topbus123 (Rodrigo Alves) e garante integração total entre o frontend e o backend. Certifique-se de que todos os campos do formulário estejam alinhados com o schema do backend para evitar erros de registro.
+
 3. Não versione o arquivo `.env`; utilize apenas o `.env.example` como referência.
 
-Sem essa variável o formulário não conseguirá entregar novas reclamações.
+**Importante:** Sem essa variável o formulário não conseguirá entregar novas reclamações.
 
 ## Características do Formulário
 

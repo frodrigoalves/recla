@@ -28,5 +28,5 @@ export const LINHAS = [
 ];
 
 export const SLA_DIAS = 7;
-export const MIN_DESCRICAO_LENGTH = 20;
+export const MIN_DESCRICAO_LENGTH = 50;
 export const MAX_DESCRICAO_LENGTH = 1000;

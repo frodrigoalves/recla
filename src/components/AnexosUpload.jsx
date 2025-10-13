@@ -76,13 +76,24 @@ export default function AnexosUpload({ data, onChange }) {
         <br />
         Tamanho máximo por arquivo: 15MB
       </div>
-      <input
-        type="file"
-        multiple
-        accept="image/*,audio/*,video/*,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        onChange={handleFiles}
-        className="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer"
-      />
+      <div className="space-y-2">
+        <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700">
+          Selecione os arquivos
+          <span className="text-red-500 ml-1" aria-label="opcional">(opcional)</span>
+        </label>
+        <input
+          id="file-upload"
+          type="file"
+          multiple
+          accept="image/*,audio/*,video/*,application/pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          onChange={handleFiles}
+          aria-describedby="file-help"
+          className="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+        <p id="file-help" className="text-sm text-gray-500">
+          Formatos aceitos: imagens, áudios, vídeos, PDF e documentos Word. Tamanho máximo: 15MB por arquivo.
+        </p>
+      </div>
       {attachments.length > 0 && (
         <ul className="space-y-2 text-sm text-gray-700">
           {attachments.map((f, i) => (

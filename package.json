@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "sync-gas": "node scripts/sync-apps-script.js",
     "dev": "vite",
     "prebuild": "npm run clean:netlify",
     "build": "vite build",
@@ -15,10 +16,13 @@
   },
   "dependencies": {
     "@netlify/neon": "^0.1.0",
+    "chokidar": "^3.6.0",
+    "dotenv": "^16.6.1",
+    "googleapis": "^105.0.0",
     "lucide-react": "^0.543.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-router-dom": "^7.8.2"
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.9.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",

@@ -7,3 +7,4 @@ dist
 .netlify
 .netlify/
  main
+scripts/.env.apps-script

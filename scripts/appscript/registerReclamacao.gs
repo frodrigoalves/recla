@@ -90,24 +90,62 @@ function doPost(e) {
       };
 
       if (DRIVE_FOLDER_ID && e.files) {
-        const dayFolder = getDailyFolder_(DRIVE_FOLDER_ID, now);
-        Object.keys(e.files).forEach((key) => {
-          const blob = e.files[key];
-          const mt   = (blob.getContentType() || '').toLowerCase();
+        try {
+          // Verifica se o ID da pasta é válido
+          const testAccess = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+          if (!testAccess) {
+            throw new Error('ID da pasta do Drive inválido ou sem permissão de acesso');
+          }
 
-          if (!/^(image|audio|video)\//.test(mt)) return;
-          const size = (blob.getBytes() || []).length;
-          if (size > MB15) throw new Error(`Arquivo acima de 15MB (${blob.getName() || key}).`);
+          const dayFolder = getDailyFolder_(DRIVE_FOLDER_ID, now);
+          if (!dayFolder) {
+            throw new Error('Não foi possível criar/acessar a pasta do dia');
+          }
 
-          const safeName = sanitizeName_(blob.getName());
-          const stamp    = Utilities.formatDate(now, Session.getScriptTimeZone(), 'yyyyMMdd_HHmmssSSS');
-          const final    = `${proto}__${stamp}__${safeName || 'arquivo.bin'}`;
+          for (const key of Object.keys(e.files)) {
+            try {
+              const blob = e.files[key];
+              if (!blob) {
+                console.error(`Arquivo inválido para a chave ${key}`);
+                continue;
+              }
 
-          const saved = dayFolder.createFile(blob).setName(final);
-          saved.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+              const mt = (blob.getContentType() || '').toLowerCase();
+              console.log(`Processando arquivo: ${blob.getName() || key} (${mt})`);
 
-          anexosURLs.push(`https://drive.google.com/uc?export=view&id=${saved.getId()}`);
-        });
+              if (!/^(image|audio|video)\//.test(mt)) {
+                console.log(`Tipo não permitido: ${mt}`);
+                continue;
+              }
+
+              const size = (blob.getBytes() || []).length;
+              if (size > MB15) {
+                throw new Error(`Arquivo acima de 15MB (${blob.getName() || key}).`);
+              }
+
+              const safeName = sanitizeName_(blob.getName());
+              const stamp = Utilities.formatDate(now, Session.getScriptTimeZone(), 'yyyyMMdd_HHmmssSSS');
+              const final = `${proto}__${stamp}__${safeName || 'arquivo.bin'}`;
+
+              console.log(`Salvando arquivo: ${final}`);
+              const saved = dayFolder.createFile(blob).setName(final);
+              
+              if (!saved) {
+                throw new Error(`Falha ao criar arquivo: ${final}`);
+              }
+
+              saved.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+              anexosURLs.push(`https://drive.google.com/uc?export=view&id=${saved.getId()}`);
+              console.log(`Arquivo salvo com sucesso: ${final}`);
+            } catch (fileError) {
+              console.error(`Erro ao processar arquivo ${key}:`, fileError);
+              throw fileError;
+            }
+          }
+        } catch (driveError) {
+          console.error('Erro no processamento do Drive:', driveError);
+          throw new Error(`Erro no armazenamento: ${driveError.message}`);
+        }
       }
 
       if (e.parameter.anexos) {
@@ -183,19 +221,59 @@ function _json_(obj) {
 }
 
 function getDailyFolder_(rootFolderId, dateObj) {
-  const root = DriveApp.getFolderById(rootFolderId);
-  const year = dateObj.getFullYear();
-  const month = ('0' + (dateObj.getMonth() + 1)).slice(-2);
-  const day = ('0' + dateObj.getDate()).slice(-2);
+  try {
+    console.log(`Acessando pasta raiz: ${rootFolderId}`);
+    const root = DriveApp.getFolderById(rootFolderId);
+    if (!root) {
+      throw new Error('Pasta raiz não encontrada');
+    }
 
-  let yearFolder = getOrCreate_(root, year.toString());
-  let monthFolder = getOrCreate_(yearFolder, month);
-  return getOrCreate_(monthFolder, day);
+    const year = dateObj.getFullYear();
+    const month = ('0' + (dateObj.getMonth() + 1)).slice(-2);
+    const day = ('0' + dateObj.getDate()).slice(-2);
+
+    console.log(`Criando/acessando estrutura de pastas: ${year}/${month}/${day}`);
+    
+    let yearFolder = getOrCreate_(root, year.toString());
+    if (!yearFolder) throw new Error('Falha ao criar/acessar pasta do ano');
+
+    let monthFolder = getOrCreate_(yearFolder, month);
+    if (!monthFolder) throw new Error('Falha ao criar/acessar pasta do mês');
+
+    let dayFolder = getOrCreate_(monthFolder, day);
+    if (!dayFolder) throw new Error('Falha ao criar/acessar pasta do dia');
+
+    console.log('Estrutura de pastas criada/acessada com sucesso');
+    return dayFolder;
+  } catch (error) {
+    console.error('Erro ao criar estrutura de pastas:', error);
+    throw error;
+  }
 }
 
 function getOrCreate_(parent, name) {
-  const it = parent.getFoldersByName(name);
-  return it.hasNext() ? it.next() : parent.createFolder(name);
+  try {
+    console.log(`Procurando/criando pasta: ${name}`);
+    const it = parent.getFoldersByName(name);
+    
+    if (it.hasNext()) {
+      console.log(`Pasta existente encontrada: ${name}`);
+      return it.next();
+    }
+    
+    console.log(`Criando nova pasta: ${name}`);
+    const newFolder = parent.createFolder(name);
+    
+    if (!newFolder) {
+      throw new Error(`Falha ao criar pasta: ${name}`);
+    }
+    
+    console.log(`Nova pasta criada: ${name}`);
+    return newFolder;
+  } catch (error) {
+    console.error(`Erro ao acessar/criar pasta ${name}:`, error);
+    throw error;
+  }
 }
 
 function sanitizeName_(name) {

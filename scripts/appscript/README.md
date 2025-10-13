@@ -1,26 +1,68 @@
-# Configuração do Google Apps Script
+# Biblioteca Topbus123 - Gestão de Reclamações v14.3
 
-Este diretório documenta como publicar o Apps Script responsável por registrar as reclamações na planilha do Google Sheets e salvar anexos no Google Drive.
+Este diretório contém o código da biblioteca do Google Apps Script responsável por registrar reclamações na planilha e gerenciar anexos no Drive.
+
+## Informações do Deploy
+
+- **ID da Biblioteca**: `11sizcsJ5PW-zMb7rpthjCrzRM1O4df8b7GXmIOsLCm69ECta0j-4rXJG`
+- **Versão**: 14 (06/10/2025)
+- **URL do Web App**: `https://script.google.com/macros/s/AKfycbwdFNyYGTT5F2J4uyfsiOV9DfBhkPYjFqiYVIQh9TJ73rgzO9ES8QFdb5lx7GM9siqDRA/exec`
 
 ## Pré-requisitos
 
-1. Uma planilha com a aba `Publico` criada com o cabeçalho definido no script (`COLS`).
-2. Uma pasta no Google Drive onde os anexos serão armazenados.
-3. Acesso ao [Google Apps Script](https://script.google.com) com a mesma conta proprietária da planilha e da pasta.
+1. Uma planilha com a aba `Publico` criada com o cabeçalho definido em `COLS`
+2. Uma pasta no Google Drive para armazenar anexos
+3. Acesso ao [Google Apps Script](https://script.google.com) com conta proprietária
 
-## Passo a passo
+## Como Usar a Biblioteca
 
-1. Crie um novo projeto no Apps Script e substitua o conteúdo padrão pelo arquivo [`registerReclamacao.gs`](./registerReclamacao.gs).
-2. Atualize as constantes `SHEET_ID_RECLAMACOES`, `SHEET_NAME`, `DRIVE_FOLDER_ID` e `PROTO_PREFIX` com os IDs reais do seu ambiente.
-3. Em **Serviços avançados do Google**, habilite a API do Drive (`Drive v3`).
-4. No menu **Implantar → Implementações**, escolha **Aplicativo da Web**, execute como o usuário proprietário e permita acesso para *Qualquer pessoa*.
-5. Copie a URL de publicação e atribua à variável `VITE_APPSCRIPT_URL` no arquivo `.env` da aplicação.
+### 1. Adicionar ao seu Projeto
 
-Após salvar e implantar, o formulário enviará os dados via `multipart/form-data`. O script fará:
+1. No editor do Apps Script, clique em "Biblioteca +" na barra lateral
+2. Cole o ID: `11sizcsJ5PW-zMb7rpthjCrzRM1O4df8b7GXmIOsLCm69ECta0j-4rXJG`
+3. Selecione a versão 14
+4. Clique em "Adicionar"
 
-- geração automática de um protocolo (`TOP-<timestamp>`),
-- validação dos campos de contato e LGPD,
-- persistência dos anexos enviados no Drive (organizados em pastas por ano/mês/dia),
-- registro da linha completa na planilha com os links dos anexos (Drive ou IDs externos).
+### 2. Configurar Ambiente
 
-Caso a função serverless da Netlify armazene anexos no Neon, os IDs retornados serão encaminhados no campo `anexos` como um array JSON, permitindo rastreio cruzado entre a planilha e o banco de dados.
+```javascript
+// Configure suas credenciais
+const CONFIG = {
+  SHEET_ID: 'seu_id_da_planilha',
+  SHEET_NAME: 'nome_da_aba',
+  DRIVE_FOLDER: 'id_da_pasta_drive'
+};
+
+// Exemplo de uso
+function registrarReclamacao() {
+  const dados = {
+    assunto: 'Atraso',
+    descricao: 'Ônibus atrasou 30 minutos',
+    nome_completo: 'João Silva',
+    email: 'joao@email.com',
+    lgpd_aceite: true
+  };
+  
+  const resultado = Topbus.registrar(dados);
+  Logger.log(resultado);
+}
+```
+
+## Funcionalidades
+
+O script gerencia automaticamente:
+
+1. **Protocolo**: Gera `TOP-<timestamp>` único
+2. **Validação**: Verifica contato e LGPD
+3. **Anexos**:
+   - Salva no Drive (pastas ano/mês/dia)
+   - Suporta imagens, áudio e vídeo
+   - Limite de 15MB por arquivo
+4. **Planilha**: Registra com links dos anexos
+5. **Integração**: Suporta IDs externos (Neon/Netlify)
+
+## API Web
+
+- **GET /exec?health=1**: Status do serviço
+- **GET /exec?catalogo=1**: Lista linhas/tipos
+- **POST /exec**: Registra reclamação
