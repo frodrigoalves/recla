@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./NovaReclamacao.css";
+import topbusIcon from "../assets/topbus-icon.svg";
 
 const API_URL =
   import.meta.env.VITE_RECLAMACAO_ENDPOINT ||
@@ -325,7 +326,11 @@ export default function NovaReclamacao() {
       <div className="topbus-container">
         <div className="topbus-header">
           <div className="topbus-logo">
-            <div className="topbus-logo-icon">🚍</div>
+            <img
+              src={topbusIcon}
+              alt="Logomarca TopBus"
+              className="topbus-logo-icon"
+            />
             <div className="topbus-logo-text">
               <h1>TOPBUS</h1>
               <p>TRANSPORTES S/A</p>
@@ -356,7 +361,11 @@ export default function NovaReclamacao() {
     <div className="topbus-container">
       <div className="topbus-header">
         <div className="topbus-logo">
-          <div className="topbus-logo-icon">🚍</div>
+          <img
+            src={topbusIcon}
+            alt="Logomarca TopBus"
+            className="topbus-logo-icon"
+          />
           <div className="topbus-logo-text">
             <h1>TOPBUS</h1>
             <p>TRANSPORTES S/A</p>
