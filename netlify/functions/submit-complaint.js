@@ -38,7 +38,7 @@ export async function handler(event) {
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
-      headers: { ...corsHeaders, Allow: "POST" },
+      headers: { ...corsHeaders, Allow: "POST", "Content-Type": "application/json" },
       body: JSON.stringify({ success: false, message: "Method Not Allowed" }),
     };
   }
@@ -46,7 +46,7 @@ export async function handler(event) {
   if (!event.body) {
     return {
       statusCode: 400,
-      headers: corsHeaders,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       body: JSON.stringify({ success: false, message: "Corpo da requisição ausente." }),
     };
   }
@@ -75,7 +75,7 @@ export async function handler(event) {
 
       return {
         statusCode: upstreamResponse.status,
-        headers: corsHeaders,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
         body: JSON.stringify({ success: false, message }),
       };
     }
@@ -87,14 +87,14 @@ export async function handler(event) {
 
     return {
       statusCode: 200,
-      headers: corsHeaders,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       body: JSON.stringify(successBody),
     };
   } catch (error) {
     console.error("Erro ao encaminhar a reclamação", error);
     return {
       statusCode: 502,
-      headers: corsHeaders,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
       body: JSON.stringify({
         success: false,
         message: "Não foi possível contactar o serviço de processamento das reclamações.",
