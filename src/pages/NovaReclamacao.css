@@ -1,0 +1,491 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary: #1a3a6c;
+  --secondary: #ff6b35;
+  --accent: #2a5ba7;
+  --success: #28a745;
+  --light: #ffffff;
+  --dark: #2d3748;
+  --gray: #718096;
+  --border: #e2e8f0;
+  --background: #f7fafc;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--background);
+  min-height: 100vh;
+  padding: 20px;
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+.topbus-container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--light);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.topbus-header {
+  background: var(--light);
+  color: var(--dark);
+  padding: 30px;
+  text-align: center;
+  position: relative;
+  border-bottom: 3px solid var(--secondary);
+}
+
+.topbus-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.topbus-logo-icon {
+  width: 60px;
+  height: 60px;
+  margin-right: 15px;
+  display: block;
+  object-fit: contain;
+}
+
+.topbus-logo-text {
+  text-align: left;
+}
+
+.topbus-logo-text h1 {
+  font-size: 2.2em;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+  color: var(--primary);
+}
+
+.topbus-logo-text p {
+  font-size: 1em;
+  color: var(--gray);
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.topbus-header p {
+  font-size: 1.1em;
+  color: var(--gray);
+  max-width: 600px;
+  margin: 0 auto;
+  font-weight: 400;
+}
+
+.topbus-form-container {
+  padding: 30px;
+}
+
+.topbus-form-section {
+  margin-bottom: 35px;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.topbus-section-title {
+  color: var(--primary);
+  margin-bottom: 20px;
+  font-size: 1.3em;
+  display: flex;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+  font-weight: 600;
+}
+
+.topbus-section-title i {
+  margin-right: 12px;
+  color: var(--secondary);
+  font-size: 1.2em;
+}
+
+.topbus-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.topbus-form-group {
+  margin-bottom: 20px;
+}
+
+.topbus-full-width {
+  grid-column: 1 / -1;
+}
+
+.topbus-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--dark);
+  font-size: 0.95em;
+}
+
+.topbus-required::after {
+  content: " *";
+  color: var(--secondary);
+}
+
+.topbus-form-group input,
+.topbus-form-group select,
+.topbus-form-group textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  background: var(--light);
+}
+
+.topbus-form-group input:focus,
+.topbus-form-group select:focus,
+.topbus-form-group textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(42, 91, 167, 0.1);
+}
+
+.topbus-form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.topbus-file-upload {
+  border: 2px dashed var(--border);
+  border-radius: 8px;
+  padding: 25px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+}
+
+.topbus-file-upload:hover {
+  border-color: var(--accent);
+  background: #f8fbff;
+}
+
+.topbus-file-upload i {
+  font-size: 2.5em;
+  color: var(--gray);
+  margin-bottom: 15px;
+}
+
+.topbus-file-upload p {
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: var(--dark);
+}
+
+.topbus-file-upload small {
+  color: var(--gray);
+}
+
+.topbus-file-list {
+  margin-top: 15px;
+}
+
+.topbus-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border-left: 4px solid var(--accent);
+  transition: all 0.3s ease;
+}
+
+.topbus-file-item:hover {
+  background: #f0f4f8;
+}
+
+.topbus-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbus-file-icon {
+  color: var(--accent);
+}
+
+.topbus-remove-file {
+  color: var(--secondary);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.topbus-remove-file:hover {
+  background: rgba(255, 107, 53, 0.1);
+}
+
+.topbus-checkbox-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #f8f9fa;
+}
+
+.topbus-checkbox-group input {
+  width: auto;
+  margin-top: 3px;
+}
+
+.topbus-checkbox-group label {
+  margin-bottom: 0;
+  font-weight: normal;
+  font-size: 0.9em;
+  line-height: 1.4;
+}
+
+.topbus-contact-toggle {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid var(--secondary);
+}
+
+.topbus-toggle-switch {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.topbus-toggle-switch input {
+  display: none;
+}
+
+.topbus-toggle-slider {
+  width: 50px;
+  height: 26px;
+  background: #cbd5e0;
+  border-radius: 13px;
+  position: relative;
+  transition: background 0.3s;
+}
+
+.topbus-toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.topbus-toggle-checkbox:checked + .topbus-toggle-slider {
+  background: var(--secondary);
+}
+
+.topbus-toggle-checkbox:checked + .topbus-toggle-slider::before {
+  transform: translateX(24px);
+}
+
+.topbus-contact-fields {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid var(--accent);
+  display: none;
+}
+
+.topbus-contact-fields.active {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+.topbus-lgpd-notice {
+  background: #fff3e0;
+  border-left: 4px solid var(--secondary);
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 15px;
+  font-size: 0.9em;
+  color: var(--dark);
+}
+
+.topbus-lgpd-notice strong {
+  color: var(--secondary);
+}
+
+.topbus-form-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 1px solid var(--border);
+}
+
+.topbus-btn {
+  padding: 14px 40px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.topbus-btn-submit {
+  background: var(--secondary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.topbus-btn-submit:hover {
+  background: #e55a2b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(255, 107, 53, 0.4);
+}
+
+.topbus-btn:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.topbus-protocol-display {
+  text-align: center;
+  padding: 40px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  margin-top: 20px;
+  display: none;
+  border: 2px dashed var(--accent);
+}
+
+.topbus-protocol-display.active {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+.topbus-protocol-number {
+  font-size: 2.2em;
+  color: var(--success);
+  font-weight: bold;
+  margin: 20px 0;
+  background: white;
+  padding: 15px 25px;
+  border-radius: 8px;
+  border: 2px solid var(--success);
+  display: inline-block;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.topbus-success-icon {
+  font-size: 4em;
+  color: var(--success);
+  margin-bottom: 20px;
+}
+
+.topbus-error-message {
+  color: #e53e3e;
+  font-size: 0.85em;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-content: center;
+}
+
+.topbus-info-text {
+  color: var(--gray);
+  font-size: 0.85em;
+  margin-top: 5px;
+}
+
+.topbus-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 15px;
+  padding-right: 45px;
+}
+
+@media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+
+  .topbus-form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .topbus-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .topbus-header {
+    padding: 25px 20px;
+  }
+
+  .topbus-form-container {
+    padding: 25px 20px;
+  }
+
+  .topbus-logo {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .topbus-logo-icon {
+    width: 56px;
+    height: 56px;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .topbus-logo-text {
+    text-align: center;
+  }
+}

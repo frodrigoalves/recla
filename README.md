@@ -25,10 +25,15 @@ Aplicação React construída com Vite para registrar reclamações sobre o tran
 ## Configuração do ambiente
 
 1. Copie o arquivo `.env.example` para `.env`.
-2. Defina `VITE_APPSCRIPT_URL` com o endpoint publicado do Apps Script (versão 14.3 - Topbus123 by Rodrigo Alves: `https://script.google.com/macros/s/AKfycbwdFNyYGTT5F2J4uyfsiOV9DfBhkPYjFqiYVIQh9TJ73rgzO9ES8QFdb5lx7GM9siqDRA/exec`). Essa variável é utilizada pelo formulário React para enviar os dados via `multipart/form-data` diretamente para o Apps Script.
-3. Não versione o arquivo `.env`; utilize apenas o `.env.example` como referência.
+2. Atualize a variável `APPS_SCRIPT_URL` com o endpoint publicado do Apps Script (versão 8, implantada em 13/10/2025 04:23: `https://script.google.com/macros/s/AKfycbwbMRcY2YDufjLe1itVR6--aA1REGJTfFFI3z7WLqx8jdnA58ndc2mHkc2WRDdUf7CrQg/exec`). Essa URL é consumida pela função serverless `submit-complaint` e evita erros de CORS no navegador.
+3. (Opcional) defina `CORS_ALLOW_ORIGIN` para controlar quais domínios podem consumir o proxy. Valores aceitos:
+   - um domínio específico (ex.: `https://www.topbus.site`) quando quiser restringir o acesso;
+   - `auto` para fazer o proxy refletir dinamicamente o cabeçalho `Origin` enviado pelo navegador;
+   - deixe em branco/remova a variável para manter o comportamento padrão (`*`).
+4. (Opcional) Defina `VITE_RECLAMACAO_ENDPOINT` caso queira que o frontend envie diretamente para outro endpoint (por padrão ele usa `/.netlify/functions/submit-complaint`).
+5. Não versione o arquivo `.env`; utilize apenas o `.env.example` como referência.
 
-Sem essa variável o formulário não conseguirá entregar novas reclamações.
+Sem `APPS_SCRIPT_URL` o proxy serverless não conseguirá entregar novas reclamações ao backend.
 
 ## Características do Formulário
 
@@ -38,29 +43,27 @@ Sem essa variável o formulário não conseguirá entregar novas reclamações.
 - **Protocolo automático**: Geração automática de protocolo para acompanhamento
 - **Responsivo**: Layout otimizado para desktop e mobile
 
-### Testes do Apps Script v14.3
+### Apps Script (Versão 8)
 
-A versão 14.3 do Apps Script (Topbus123) inclui melhorias significativas:
+A versão 8 do Apps Script recebe os dados em JSON (estrutura `{ dados, anexos }`) e é responsável por:
 
-#### Endpoints disponíveis
-
-- **Health Check**: `curl -L "${VITE_APPSCRIPT_URL}?health=1"` → retorna status online
-- **Catálogo**: `curl -L "${VITE_APPSCRIPT_URL}?catalogo=1"` → retorna tipos de ônibus e linhas
-- **Info**: `curl -L "${VITE_APPSCRIPT_URL}"` → retorna informações da versão e endpoints
-
-#### Recursos v14.3
-
-- ✅ **Pasta backup**: sistema failover automático para armazenamento no Drive
-- ✅ **Logs detalhados**: depuração aprimorada com timestamps
-- ✅ **Validação de MIME**: aceita imagens, áudio, vídeo, PDF e documentos Office
-- ✅ **Organização por data**: arquivos organizados automaticamente em pastas ano/mês/dia
-- ✅ **Headers automáticos**: cabeçalhos da planilha são verificados e criados automaticamente
+- gerar o protocolo sequencial na aba `Reclamações` da planilha `1g-6_PXrPCVtwYEBx1pe7xc9CELib4btbepB2LDD0FlA`;
+- salvar anexos no Drive na pasta `1U_1AHzX188eiE1jeF73OTlOmuH-kXFtB` e registrar os links na coluna **Anexos**;
+- aceitar campos equivalentes (ex.: `linha`, `line`, `rota`) para facilitar compatibilidade entre versões do frontend;
+- retornar um JSON com `{ success, protocolo, message }`, utilizado pelo formulário para exibir o comprovante.
 
 #### Testes recomendados
 
-1. **Health check**: `curl -L "${VITE_APPSCRIPT_URL}?health=1"` → deve retornar `{"ok":true,"service":"topbus","status":"online"}`
-2. **Formulário completo**: teste o envio com anexos via `npm run dev`
-3. **Verificação na planilha**: confirme que os dados aparecem na aba **Publico**
-4. **URLs no Drive**: verifique se as URLs dos arquivos estão na coluna **anexos**
+1. **Proxy serverless**: `curl -X POST -H "Content-Type: application/json" -d '{"dados":{"assunto":"TESTE","linha":"9208","descricao":"Ping"},"anexos":[]}' http://localhost:8888/.netlify/functions/submit-complaint`
+2. **Verificação na planilha**: confirme que os dados aparecem na aba **Reclamações** com o protocolo e status `Pendente`.
+3. **URLs no Drive**: verifique se as URLs dos arquivos estão na coluna **Anexos** quando anexos são enviados.
 
-> Observação: o protocolo só é exibido após a confirmação de sucesso enviada pelo Apps Script via `postMessage`.
+> Observação: ao utilizar `VITE_RECLAMACAO_ENDPOINT` para enviar direto ao Apps Script, o serviço precisa estar com CORS liberado; do contrário, mantenha o proxy serverless ativado.
+
+### Como o CORS funciona no projeto
+
+1. **Solicitação do navegador** – sempre que o frontend hospedado em `topbus.site` (ou outro domínio) chama o proxy, o navegador envia o cabeçalho `Origin` com a origem completa (esquema + host + porta).
+2. **Resposta do proxy Netlify** – a função `submit-complaint` lê esse cabeçalho e aplica as regras definidas em `CORS_ALLOW_ORIGIN`, devolvendo `Access-Control-Allow-Origin`, `Access-Control-Allow-Methods` e `Access-Control-Allow-Headers` conforme a [política de mesma origem](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/CORS).
+3. **Validação do navegador** – quando a resposta contém o cabeçalho autorizado, o navegador libera o JavaScript para ler os dados retornados. Caso contrário, o erro de CORS aparece no console.
+
+> Se for necessário enviar cookies/credenciais junto com as requisições, ajuste o proxy para retornar um domínio específico (nunca `*`) e habilite `credentials: 'include'` no fetch do frontend.
