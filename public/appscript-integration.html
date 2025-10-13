@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TopBus - Formulário de Reclamações</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1a3a6c;
+            --secondary: #ff6b35;
+            --accent: #2a5ba7;
+            --success: #28a745;
+            --light: #ffffff;
+            --dark: #2d3748;
+            --gray: #718096;
+            --border: #e2e8f0;
+            --background: #f7fafc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .header {
+            background: var(--light);
+            color: var(--dark);
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            border-bottom: 3px solid var(--secondary);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .logo-icon {
+            font-size: 2.5em;
+            margin-right: 15px;
+            color: var(--primary);
+        }
+
+        .logo-text {
+            text-align: left;
+        }
+
+        .logo-text h1 {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1;
+            color: var(--primary);
+        }
+
+        .logo-text p {
+            font-size: 1em;
+            color: var(--gray);
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-section {
+            margin-bottom: 35px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+            font-weight: 600;
+        }
+
+        .section-title i {
+            margin-right: 12px;
+            color: var(--secondary);
+            font-size: 1.2em;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95em;
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--secondary);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: var(--light);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(42, 91, 167, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .file-upload {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .file-upload:hover {
+            border-color: var(--accent);
+            background: #f8fbff;
+        }
+
+        .file-upload i {
+            font-size: 2.5em;
+            color: var(--gray);
+            margin-bottom: 15px;
+        }
+
+        .file-upload p {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .file-upload small {
+            color: var(--gray);
+        }
+
+        .file-list {
+            margin-top: 15px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 4px solid var(--accent);
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            background: #f0f4f8;
+        }
+
+        .file-item .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-item .file-icon {
+            color: var(--accent);
+        }
+
+        .file-item .remove-file {
+            color: var(--secondary);
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .file-item .remove-file:hover {
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .checkbox-group input {
+            width: auto;
+            margin-top: 3px;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            font-weight: normal;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .contact-toggle {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid var(--secondary);
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+        .toggle-slider {
+            width: 50px;
+            height: 26px;
+            background: #cbd5e0;
+            border-radius: 13px;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .toggle-slider:before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .toggle-slider {
+            background: var(--secondary);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .contact-fields {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            display: none;
+        }
+
+        .contact-fields.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .lgpd-notice {
+            background: #fff3e0;
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: var(--dark);
+        }
+
+        .lgpd-notice strong {
+            color: var(--secondary);
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-submit {
+            background: var(--secondary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .btn-submit:hover {
+            background: #e55a2b;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .protocol-display {
+            text-align: center;
+            padding: 40px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+            border: 2px dashed var(--accent);
+        }
+
+        .protocol-display.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .protocol-number {
+            font-size: 2.2em;
+            color: var(--success);
+            font-weight: bold;
+            margin: 20px 0;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            border: 2px solid var(--success);
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+        }
+
+        .success-icon {
+            font-size: 4em;
+            color: var(--success);
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.85em;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .info-text {
+            color: var(--gray);
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        /* Custom select styling */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 15px;
+            padding-right: 45px;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .header {
+                padding: 25px 20px;
+            }
+
+            .form-container {
+                padding: 25px 20px;
+            }
+
+            .logo {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .logo-icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .logo-text {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">🚍</div>
+                <div class="logo-text">
+                    <h1>TOPBUS</h1>
+                    <p>TRANSPORTES S/A</p>
+                </div>
+            </div>
+            <p>Formulário de Registro de Reclamações</p>
+        </div>
+
+        <div class="form-container">
+            <form id="reclamacaoForm">
+                <!-- Seção de Dados da Ocorrência -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-clipboard-list"></i>
+                        Dados da Ocorrência
+                    </h2>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="assunto" class="required">Assunto</label>
+                            <select id="assunto" name="assunto" required>
+                                <option value="">Selecione o assunto</option>
+                                <option value="ACESSIBILIDADE">ACESSIBILIDADE</option>
+                                <option value="ATRASO NA CHEGADA DO ÔNIBUS">ATRASO NA CHEGADA DO ÔNIBUS</option>
+                                <option value="COMPORTAMENTO INADEQUADO DO MOTORISTA">COMPORTAMENTO INADEQUADO DO MOTORISTA</option>
+                                <option value="CONDIÇÕES DO VEÍCULO">CONDIÇÕES DO VEÍCULO</option>
+                                <option value="EXCESSO DE PASSAGEIROS">EXCESSO DE PASSAGEIROS</option>
+                                <option value="FALTA DE ÔNIBUS">FALTA DE ÔNIBUS</option>
+                                <option value="ITINERÁRIO / PERCURSO">ITINERÁRIO / PERCURSO</option>
+                                <option value="LIMPEZA DO VEÍCULO">LIMPEZA DO VEÍCULO</option>
+                                <option value="OUTROS">OUTROS</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="tipo_onibus" class="required">Tipo de Ônibus</label>
+                            <select id="tipo_onibus" name="tipo_onibus" required>
+                                <option value="">Selecione o tipo</option>
+                                <option value="Padron">Padron</option>
+                                <option value="Convencional">Convencional</option>
+                                <option value="Articulado">Articulado</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="data_hora_ocorrencia" class="required">Data e Hora da Ocorrência</label>
+                            <input type="datetime-local" id="data_hora_ocorrencia" name="data_hora_ocorrencia" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="linha" class="required">Linha do Ônibus</label>
+                            <select id="linha" name="linha" required>
+                                <option value="">Selecione a linha</option>
+                                <option value="85 - EST. S. GABRIEL/CENTRO - VIA FLORESTA">85 - EST. S. GABRIEL/CENTRO - VIA FLORESTA</option>
+                                <option value="262 - ESTAÇÃO JOSÉ CÂNDIDO / VILA MARIA">262 - ESTAÇÃO JOSÉ CÂNDIDO / VILA MARIA</option>
+                                <option value="812 - ESTAÇÃO SÃO GABRIEL">812 - ESTAÇÃO SÃO GABRIEL</option>
+                                <option value="815 - ESTAÇÃO SÃO GABRIEL/COML PAULO VI">815 - ESTAÇÃO SÃO GABRIEL/COML PAULO VI</option>
+                                <option value="822 - ESTAÇÃO JOSÉ CÂNDIDO / VILA MARIA">822 - ESTAÇÃO JOSÉ CÂNDIDO / VILA MARIA</option>
+                                <option value="5201 - DONA CLARA/JURITIS">5201 - DONA CLARA/JURITIS</option>
+                                <option value="5401 - SÃO LUIZ/DOM CABIAL">5401 - SÃO LUIZ/DOM CABIAL</option>
+                                <option value="9105 - NOVA VISTA/SDN">9105 - NOVA VISTA/SDN</option>
+                                <option value="9204 - SANTA EFIGÊNIA/ESTORIL">9204 - SANTA EFIGÊNIA/ESTORIL</option>
+                                <option value="9208 - TACUARIL/CONJ. SANTA MARIA">9208 - TACUARIL/CONJ. SANTA MARIA</option>
+                                <option value="9211 - CAETANO FURQUIM/ATIAIANA">9211 - CAETANO FURQUIM/ATIAIANA</option>
+                                <option value="9214 - CAETANO FURQUIM/ATIAIANA - VIA ALTO HAVAÍ">9214 - CAETANO FURQUIM/ATIAIANA - VIA ALTO HAVAÍ</option>
+                                <option value="9250 - CAETANO FURQUIM/ATIAIANA/ENTRA">9250 - CAETANO FURQUIM/ATIAIANA/ENTRA</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="numero_veiculo">Número do Veículo</label>
+                            <input type="text" id="numero_veiculo" name="numero_veiculo" placeholder="Número identificador do ônibus">
+                            <div class="info-text">Ex: 10570, 20499, 20575, etc.</div>
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="local" class="required">Local da Ocorrência</label>
+                            <input type="text" id="local" name="local" required placeholder="Ex: Terminal Central, Av. Principal, etc.">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção de Detalhes -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-align-left"></i>
+                        Detalhes da Reclamação
+                    </h2>
+                    
+                    <div class="form-group">
+                        <label for="descricao" class="required">Descrição Detalhada</label>
+                        <textarea id="descricao" name="descricao" required placeholder="Descreva com detalhes o que aconteceu, incluindo horários, pessoas envolvidas, circunstâncias, etc."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Anexos (Opcional)</label>
+                        <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Clique para adicionar fotos, vídeos ou documentos</p>
+                            <small>Formatos suportados: JPG, PNG, PDF, MP4, MP3 (Máx. 15MB cada)</small>
+                        </div>
+                        <input type="file" id="fileInput" multiple style="display: none;" onchange="handleFileSelect(event)">
+                        
+                        <div class="file-list" id="fileList"></div>
+                    </div>
+                </div>
+
+                <!-- Seção de Contato (Opcional) -->
+                <div class="form-section">
+                    <h2 class="section-title">
+                        <i class="fas fa-user"></i>
+                        Dados de Contato (Opcional)
+                    </h2>
+                    
+                    <div class="contact-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleContact" onchange="toggleContactFields()">
+                            <span class="toggle-slider"></span>
+                            <span>Desejo fornecer meus dados para possível retorno</span>
+                        </label>
+                    </div>
+
+                    <div class="contact-fields" id="contactFields">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="nome">Nome Completo</label>
+                                <input type="text" id="nome" name="nome" placeholder="Seu nome completo">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">E-mail</label>
+                                <input type="email" id="email" name="email" placeholder="seu@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label for="telefone">Telefone</label>
+                                <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-9999">
+                            </div>
+                        </div>
+                        
+                        <div class="lgpd-notice">
+                            <strong>Aviso sobre Proteção de Dados:</strong><br>
+                            Ao fornecer seus dados, você concorda com o tratamento das informações para fins de atendimento e retorno sobre esta reclamação, de acordo com a Lei Geral de Proteção de Dados (LGPD).
+                        </div>
+                        
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="lgpd_aceite" name="lgpd_aceite" value="true">
+                            <label for="lgpd_aceite" class="required">Declaro que li e concordo com os termos de proteção de dados</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão de Envio -->
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-submit">
+                        <i class="fas fa-paper-plane"></i>
+                        Enviar Reclamação
+                    </button>
+                </div>
+            </form>
+
+            <!-- Seção de Sucesso -->
+            <div class="protocol-display" id="protocoloDisplay">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 style="color: var(--success);">Reclamação Registrada com Sucesso!</h2>
+                <p>Sua reclamação foi recebida e será analisada pela nossa equipe.</p>
+                <div class="protocol-number" id="protocoloNumber"></div>
+                <p>Guarde este número para acompanhar o andamento</p>
+                <button type="button" class="btn btn-submit" onclick="resetForm()" style="margin-top: 20px;">
+                    <i class="fas fa-plus"></i>
+                    Nova Reclamação
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração da API
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzfrsdMWqTZq880AX-aCW5r7U01QlHTKQ4FzM6bpgxIpntsiM-7BP2S9Fqa-BBQvTO5Mw/exec';
+        
+        let selectedFiles = [];
+
+        // Alternar campos de contato
+        function toggleContactFields() {
+            const contactFields = document.getElementById('contactFields');
+            const toggle = document.getElementById('toggleContact');
+            
+            if (toggle.checked) {
+                contactFields.classList.add('active');
+            } else {
+                contactFields.classList.remove('active');
+                // Limpar campos quando desativado
+                document.getElementById('nome').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('telefone').value = '';
+                document.getElementById('lgpd_aceite').checked = false;
+            }
+        }
+
+        // Manipulação de arquivos
+        function handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            
+            files.forEach(file => {
+                if (file.size > 15 * 1024 * 1024) {
+                    alert(`O arquivo ${file.name} excede o limite de 15MB`);
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    selectedFiles.push({
+                        name: file.name,
+                        type: file.type,
+                        base64: e.target.result.split(',')[1]
+                    });
+                    updateFileList();
+                };
+                reader.readAsDataURL(file);
+            });
+            
+            event.target.value = '';
+        }
+
+        function updateFileList() {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            
+            selectedFiles.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <i class="fas fa-file file-icon"></i>
+                        <span>${file.name}</span>
+                    </div>
+                    <span class="remove-file" onclick="removeFile(${index})">
+                        <i class="fas fa-times"></i>
+                    </span>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+        }
+
+        // Envio do formulário
+        document.getElementById('reclamacaoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            
+            try {
+                const formData = new FormData(this);
+                const toggleContact = document.getElementById('toggleContact').checked;
+                
+                // Validar LGPD se forneceu dados de contato
+                if (toggleContact && !document.getElementById('lgpd_aceite').checked) {
+                    alert('Para fornecer seus dados de contato, é necessário aceitar os termos de proteção de dados.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Reclamação';
+                    return;
+                }
+                
+                const data = {
+                    assunto: formData.get('assunto'),
+                    data_hora_ocorrencia: formData.get('data_hora_ocorrencia'),
+                    linha: formData.get('linha'),
+                    numero_veiculo: formData.get('numero_veiculo'),
+                    local: formData.get('local'),
+                    tipo_onibus: formData.get('tipo_onibus'),
+                    descricao: formData.get('descricao'),
+                    anexos: selectedFiles
+                };
+                
+                // Adicionar dados de contato apenas se o usuário optou por fornecer
+                if (toggleContact) {
+                    data.nome = formData.get('nome') || '';
+                    data.email = formData.get('email') || '';
+                    data.telefone = formData.get('telefone') || '';
+                    data.quer_retorno = 'true';
+                    data.lgpd_aceite = 'true';
+                } else {
+                    data.nome = '';
+                    data.email = '';
+                    data.telefone = '';
+                    data.quer_retorno = 'false';
+                    data.lgpd_aceite = 'true'; // Aceite implícito para envio anônimo
+                }
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Mostrar protocolo e ocultar formulário
+                    document.getElementById('reclamacaoForm').style.display = 'none';
+                    document.getElementById('protocoloDisplay').classList.add('active');
+                    document.getElementById('protocoloNumber').textContent = result.protocolo;
+                } else {
+                    throw new Error(result.message);
+                }
+                
+            } catch (error) {
+                alert('Erro ao enviar reclamação: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Reclamação';
+            }
+        });
+
+        // Reset do formulário
+        function resetForm() {
+            document.getElementById('reclamacaoForm').reset();
+            document.getElementById('reclamacaoForm').style.display = 'block';
+            document.getElementById('protocoloDisplay').classList.remove('active');
+            selectedFiles = [];
+            updateFileList();
+            
+            // Resetar toggle de contato
+            document.getElementById('toggleContact').checked = false;
+            document.getElementById('contactFields').classList.remove('active');
+            
+            const submitBtn = document.querySelector('button[type="submit"]');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Reclamação';
+            
+            // Resetar data/hora para agora
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('data_hora_ocorrencia').value = now.toISOString().slice(0, 16);
+        }
+
+        // Máscara de telefone
+        document.getElementById('telefone').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.substring(0, 11);
+            
+            if (value.length > 10) {
+                value = value.replace(/^(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            } else if (value.length > 6) {
+                value = value.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+            } else if (value.length > 0) {
+                value = value.replace(/^(\d*)/, '($1');
+            }
+            
+            e.target.value = value;
+        });
+
+        // Data e hora padrão para agora
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('data_hora_ocorrencia').value = now.toISOString().slice(0, 16);
+    </script>
+</body>
+</html>
